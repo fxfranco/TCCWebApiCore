@@ -1,0 +1,42 @@
+﻿@inherits LayoutComponentBase
+@inject TCC.Web.InternalSystems.Services.AppStateService AppState
+@inject NavigationManager Navigation
+
+<div class="page">
+    @if (AppState.IsAuthenticated)
+    {
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+
+        <main>
+            <div class="top-row px-4">
+                <span>Bienvenido, <b>@AppState.Username</b></span>
+                <button class="btn btn-link text-danger" @onclick="Logout">Cerrar Sesión</button>
+            </div>
+
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    }
+    else
+    {
+        <main class="d-flex align-items-center justify-content-center vh-100 bg-light">
+            <TCC.Web.InternalSystems.Components.Pages.Login />
+        </main>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        AppState.PropertyChanged += (s, e) => StateHasChanged();
+    }
+
+    private void Logout()
+    {
+        AppState.Logout();
+        Navigation.NavigateTo("/");
+    }
+}

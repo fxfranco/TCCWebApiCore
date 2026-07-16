@@ -1,0 +1,225 @@
+﻿@page "/sistemaSIM"
+@using System.Net.Http.Headers
+@using System.Text.Json
+@inject IHttpClientFactory ClientFactory
+@inject TCC.Web.InternalSystems.Services.AppStateServiceSIM AppStateSIM
+
+<h3>Panel de Control del Sistema</h3>
+<hr />
+
+<div class="row mb-4">
+    <div class="col-md-12 d-flex gap-3">
+        <!-- Botón 1: Obtener Token -->
+        <button class="btn btn-success" @onclick="ObtenerTokenAPI">
+            Obtener Token JWT
+        </button>
+
+        <!-- Botón 2: Input de Carga de Excel -->
+        <div class="position-relative">
+            <button class="btn btn-primary @(string.IsNullOrEmpty(AppStateSIM.Token) ? "disabled" : "")" type="button">
+                Cargar Archivo Excel
+            </button>
+            <InputFile OnChange="ProcesarExcel" class="position-absolute top-0 start-0 opacity-0 w-100 h-100" style="cursor:pointer;" disabled="@string.IsNullOrEmpty(AppStateSIM.Token)" />
+        </div>
+
+        <!-- Botón Adicional: Limpiar Memoria -->
+        @if (AppStateSIM.ExcelData != null)
+        {
+            <button class="btn btn-secondary" @onclick="LimpiarDatos">
+                Limpiar Datos
+            </button>
+        }
+    </div>
+</div>
+
+<!-- Indicadores de Estado -->
+<div class="mb-3">
+    <p>
+        Estado del Token:
+        @if (!string.IsNullOrEmpty(AppStateSIM.Token))
+        {
+            <span class="badge bg-success">Cargado en Memoria</span>
+        }
+        else
+        {
+            <span class="badge bg-warning text-dark">No generado</span>
+        }
+    </p>
+</div>
+
+@if (!string.IsNullOrEmpty(infoMessage))
+{
+    <div class="alert alert-info">@infoMessage</div>
+}
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<!-- Cuadrícula / Grid de datos Dinámica -->
+@if (AppStateSIM.ExcelData != null && AppStateSIM.ExcelData.Any())
+{
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <!-- Obtenemos los encabezados de la primera fila disponible -->
+                    @foreach (var key in AppStateSIM.ExcelData.First(r => r.Keys.Any()).Keys)
+                    {
+                        <th>@key</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in AppStateSIM.ExcelData)
+                {
+                    <tr>
+                        @foreach (var value in row.Values)
+                        {
+                            <!-- Manejo de nulos por si el string viene vacío de la API -->
+                            <td>@(value ?? string.Empty)</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else if (AppStateSIM.ExcelData != null)
+{
+    <div class="alert alert-warning">El archivo se leyó con éxito pero no devolvió registros válidos.</div>
+}
+
+@code {
+    private string? infoMessage;
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        // Re-suscripción para redibujar si el servicio muta externamente
+        AppStateSIM.PropertyChanged += (s, e) => StateHasChanged();
+    }
+
+    private async Task ObtenerTokenAPI()
+    {
+        try
+        {
+            errorMessage = null;
+            infoMessage = "Solicitando Token...";
+            var client = ClientFactory.CreateClient("SIMApi");
+
+            // Cuerpo del login requerido por tu AuthController (ajusta según tus DTOs reales)
+            var loginPayload = new { Username = AppStateSIM.Username, Password = AppStateSIM.Password };
+            var response = await client.PostAsJsonAsync("api/auth/login", loginPayload);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadFromJsonAsync<JsonElement>();
+                // Suponiendo que el JSON responde con {"token": "ey..."} o similar
+                if (content.TryGetProperty("token", out var tokenProp))
+                {
+                    AppStateSIM.Token = tokenProp.GetString();
+                    infoMessage = "¡Token obtenido con éxito y guardado en memoria!";
+                }
+                else
+                {
+                    AppStateSIM.Token = content.ToString(); // Fallback si viene en texto plano o string raíz
+                    infoMessage = "¡Token obtenido con éxito!";
+                }
+            }
+            else
+            {
+                errorMessage = $"Error al obtener token de la API: {response.StatusCode}";
+                infoMessage = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error de comunicación: {ex.Message}";
+            infoMessage = null;
+        }
+    }
+
+    private async Task ProcesarExcel(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            errorMessage = null;
+            infoMessage = "Subiendo y extrayendo datos del archivo Excel...";
+
+            var file = e.File;
+            if (file == null) return;
+
+            var client = ClientFactory.CreateClient("SIMApi");
+            // Adjuntar el JWT obtenido previamente en la cabecera Authorization
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AppStateSIM.Token);
+
+            // Preparar el archivo multipart/form-data para consumir el endpoint "extract"
+            using var content = new MultipartFormDataContent();
+            var fileStream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // Máx 10MB
+            var streamContent = new StreamContent(fileStream);
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+            
+            // "file" debe coincidir con el nombre del parámetro IFormFile en el controlador de tu API
+            content.Add(streamContent, "ExcelFile", file.Name);
+
+            var response = await client.PostAsync("api/excelfields/extract", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Se lee de manera genérica el arreglo dinámico devuelto por la API
+                var rawJson = await response.Content.ReadAsStringAsync();
+
+                // Configuramos para ignorar diferencias de mayúsculas/minúsculas
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                // Deserializamos al nuevo modelo estructurado
+                var apiResponse = JsonSerializer.Deserialize<ExcelFieldsResponse>(rawJson, options);
+
+                if (apiResponse != null)
+                {
+                    // Asignamos la propiedad 'Rows' a nuestro estado en memoria
+                    AppStateSIM.ExcelData = apiResponse.Rows;
+        
+                    // Opcional: Puedes mostrar alertas si faltaron columnas en el Excel
+                    if (apiResponse.MissingColumns.Any())
+                    {
+                        infoMessage = $"¡Excel procesado! Nota: Faltan las columnas: {string.Join(", ", apiResponse.MissingColumns)}";
+                    }
+                    else
+                    {
+                        infoMessage = "¡Excel procesado con éxito! Datos cargados en memoria.";
+                    }
+                }
+
+                // var deserialized = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(rawJson);
+                
+                // AppState.ExcelData = deserialized;
+                // infoMessage = "¡Excel procesado con éxito! Datos almacenados en memoria.";
+            }
+            else
+            {
+                errorMessage = $"Error al procesar el Excel en el API: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+                infoMessage = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ocurrió un error: {ex.Message}";
+            infoMessage = null;
+        }
+    }
+
+    private void LimpiarDatos()
+    {
+        AppStateSIM.ClearData();
+        infoMessage = "Memoria de datos del Excel limpiada.";
+        errorMessage = null;
+    }
+
+    public class ExcelFieldsResponse
+    {
+        public List<string> RequestedFields { get; set; } = new();
+        public List<string> MissingColumns { get; set; } = new();
+        public List<Dictionary<string, string?>> Rows { get; set; } = new();
+    }
+}

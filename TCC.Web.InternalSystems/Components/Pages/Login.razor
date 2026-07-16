@@ -1,0 +1,58 @@
+﻿@page "/login"
+@inject IConfiguration Configuration
+@inject TCC.Web.InternalSystems.Services.AppStateService AppState
+@inject TCC.Web.InternalSystems.Services.AppStateServiceSIM AppStateSIM
+
+<div class="card shadow" style="width: 24rem;">
+    <div class="card-body">
+        <h4 class="card-title text-center mb-4">Iniciar Sesión</h4>
+        
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <div class="mb-3">
+            <label class="form-label">Usuario</label>
+            <input type="text" class="form-control" @bind="username" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input type="password" class="form-control" @bind="password" />
+        </div>
+        <button class="btn btn-primary w-100" @onclick="HandleLogin">Ingresar</button>
+    </div>
+</div>
+
+@code {
+    private string username = "";
+    private string password = "";
+    private string? errorMessage;
+
+    private void HandleLogin()
+    {
+        var users = Configuration.GetSection("Users").Get<List<UserConfig>>();
+        var validUser = users?.FirstOrDefault(u => u.Username == username && u.Password == password);
+
+        if (validUser != null)
+        {
+            AppState.Username = validUser.Username;
+            AppState.Password = validUser.Password;
+
+            AppStateSIM.Username = validUser.Username;
+            AppStateSIM.Password = validUser.Password;
+
+            errorMessage = null;
+        }
+        else
+        {
+            errorMessage = "Usuario o contraseña incorrectos.";
+        }
+    }
+
+    public class UserConfig
+    {
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}
