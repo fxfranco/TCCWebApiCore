@@ -13,6 +13,7 @@ builder.Configuration.AddJsonFile("Data\\appusers.json", optional: false, reload
 builder.Services.AddHttpClient("BPMSApi", client =>
 {
     client.BaseAddress = new Uri("https://localhost:44313/");
+    //client.BaseAddress = new Uri("http://localhost:5080/");
 });
 
 builder.Services.AddHttpClient("SIMApi", client =>
@@ -20,8 +21,33 @@ builder.Services.AddHttpClient("SIMApi", client =>
     client.BaseAddress = new Uri("https://localhost:44314/");
 });
 
-builder.Services.AddScoped<AppStateService>();
+builder.Services.AddHttpClient("OpenComexApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:44315/");
+});
+
+builder.Services.AddHttpClient("AsisComexApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:44316/");
+});
+
+builder.Services.AddHttpClient("ExternalCarrierApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:44317/");
+});
+
+builder.Services.AddHttpClient("UsersSystemApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:44318/");
+});
+
+builder.Services.AddScoped<AppStateServiceUser>();
+builder.Services.AddScoped<AppStateServiceBPMS>();
 builder.Services.AddScoped<AppStateServiceSIM>();
+builder.Services.AddScoped<AppStateServiceOpenComex>();
+builder.Services.AddScoped<AppStateServiceAsisComex>();
+builder.Services.AddScoped<AppStateServiceExternalCarrier>();
+builder.Services.AddScoped<AppStateServiceUsersSystem>();
 
 var app = builder.Build();
 

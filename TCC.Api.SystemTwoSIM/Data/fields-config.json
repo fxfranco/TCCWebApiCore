@@ -1,10 +1,12 @@
 {
   "fields": [
+    { "name": "Id", "column": "Id" },
     { "name": "Nombre", "column": "Nombre" },
     { "name": "Apellido", "column": "Apellido" },
     { "name": "Email", "column": "Email" },
     { "name": "Departamento", "column": "Departamento" },
     { "name": "Salario", "column": "Salario" },
-    { "name": "eta", "column": "eta" }
+    { "name": "eta", "column": "eta" },
+    { "name": "Sistema", "column": "Sistema" }
   ]
 }

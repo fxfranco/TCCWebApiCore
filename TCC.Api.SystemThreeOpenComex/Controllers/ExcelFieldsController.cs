@@ -1,3 +1,4 @@
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TCC.Api.SystemThreeOpenComex.Models.DTOs;
@@ -73,6 +74,84 @@ public class ExcelFieldsController : ControllerBase
         {
             _logger.LogError(ex, "Error al procesar el archivo Excel.");
             return BadRequest(new { message = "No fue posible procesar el archivo Excel. Verifique que sea un .xlsx válido." });
+        }
+    }
+
+    [HttpPost("save-in-memory")]
+    [Authorize]
+    public IActionResult SaveInMemoryAndExport([FromBody] GuardarDatosRequest request)
+    {
+        if (request == null || request.Registros == null || !request.Registros.Any())
+        {
+            return BadRequest("No se proporcionaron registros válidos.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.RutaArchivo))
+        {
+            return BadRequest("La ruta del archivo de salida es obligatoria.");
+        }
+
+        try
+        {
+            // 1. Guardar la información en la memoria de la API
+            //_memoryService.DatosAlmacenados = request.Registros;
+            _memoryStorage.SaveLatestData(request.Registros);
+
+            // 2. Generar el archivo Excel Dinámico usando EPPlus
+            // 2. Generar el archivo Excel Dinámico usando ClosedXML
+            using (var workbook = new XLWorkbook())
+            {
+                // Crear la hoja de trabajo
+                var worksheet = workbook.Worksheets.Add("Datos BPMS");
+
+                // Extraemos todas las columnas dinámicas de los diccionarios enviados
+                var columnas = request.Registros
+                    .SelectMany(d => d.Keys)
+                    .Distinct()
+                    .ToList();
+
+                // Pintar Cabeceras (Fila 1) - ClosedXML usa base 1 para filas y columnas
+                for (int colIndex = 0; colIndex < columnas.Count; colIndex++)
+                {
+                    var celdaCabecera = worksheet.Cell(1, colIndex + 1);
+                    celdaCabecera.Value = columnas[colIndex];
+                    celdaCabecera.Style.Font.Bold = true;
+                }
+
+                // Pintar Filas de Datos (Desde fila 2)
+                int rowIndex = 2;
+                foreach (var fila in request.Registros)
+                {
+                    for (int colIndex = 0; colIndex < columnas.Count; colIndex++)
+                    {
+                        string nombreColumna = columnas[colIndex];
+                        string? valorCelda = fila.ContainsKey(nombreColumna) ? fila[nombreColumna] : string.Empty;
+
+                        // ClosedXML maneja de manera segura los strings asignándolos al valor de la celda
+                        worksheet.Cell(rowIndex, colIndex + 1).Value = valorCelda ?? string.Empty;
+                    }
+                    rowIndex++;
+                }
+
+                // Autoajustar las columnas al ancho del contenido de forma dinámica
+                worksheet.Columns().AdjustToContents();
+
+                // Asegurar que el directorio destino de la ruta exista físicamente
+                var directorio = Path.GetDirectoryName(request.RutaArchivo);
+                if (!string.IsNullOrEmpty(directorio) && !Directory.Exists(directorio))
+                {
+                    Directory.CreateDirectory(directorio);
+                }
+
+                // Guardar el libro de trabajo de ClosedXML en la ruta dada
+                workbook.SaveAs(request.RutaArchivo);
+            }
+
+            return Ok(new { mensaje = "Datos procesados y archivo guardado de forma exitosa." });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error interno al generar el archivo en el servidor: {ex.Message}");
         }
     }
 

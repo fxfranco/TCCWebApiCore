@@ -1,0 +1,28 @@
+{
+  "fields": [
+    {
+      "name": "Id",
+      "column": "Id"
+    },
+    {
+      "name": "User",
+      "column": "User"
+    },
+    {
+      "name": "Name",
+      "column": "Name"
+    },
+    {
+      "name": "Password",
+      "column": "Password"
+    },
+    {
+      "name": "Rol",
+      "column": "Rol"
+    },
+    {
+      "name": "Estado",
+      "column": "Estado"
+    }
+  ]
+}

@@ -1,10 +1,48 @@
 {
   "fields": [
-    { "name": "Nombre", "column": "Nombre" },
-    { "name": "Apellido", "column": "Apellido" },
-    { "name": "Email", "column": "Email" },
-    { "name": "Departamento", "column": "Departamento" },
-    { "name": "Salario", "column": "Salario" },
-    { "name": "eta", "column": "eta" }
+    {
+      "name": "Id",
+      "column": "Id"
+    },
+    {
+      "name": "Nombre",
+      "column": "Nombre"
+    },
+    {
+      "name": "Apellido",
+      "column": "Apellido"
+    },
+    {
+      "name": "Estado",
+      "column": "Estado"
+    },
+    {
+      "name": "Accion",
+      "column": "Accion"
+    },
+    {
+      "name": "Origen",
+      "column": "Origen"
+    },
+    {
+      "name": "Email",
+      "column": "Email"
+    },
+    {
+      "name": "Departamento",
+      "column": "Departamento"
+    },
+    {
+      "name": "Salario",
+      "column": "Salario"
+    },
+    {
+      "name": "eta",
+      "column": "eta"
+    },
+    {
+      "name": "Sistema",
+      "column": "Sistema"
+    }
   ]
 }

@@ -1,9 +1,15 @@
 ﻿@inherits LayoutComponentBase
-@inject TCC.Web.InternalSystems.Services.AppStateService AppState
+@inject TCC.Web.InternalSystems.Services.AppStateServiceUser AppStateUser
+@inject TCC.Web.InternalSystems.Services.AppStateServiceBPMS AppStateBPMS
+@inject TCC.Web.InternalSystems.Services.AppStateServiceSIM AppStateSIM
+@inject TCC.Web.InternalSystems.Services.AppStateServiceOpenComex AppStateOpenComex
+@inject TCC.Web.InternalSystems.Services.AppStateServiceAsisComex AppStateAsisComex
+@inject TCC.Web.InternalSystems.Services.AppStateServiceExternalCarrier AppStateExternalCarrier
+@inject TCC.Web.InternalSystems.Services.AppStateServiceUsersSystem AppStateUsersSystem
 @inject NavigationManager Navigation
 
 <div class="page">
-    @if (AppState.IsAuthenticated)
+    @if (AppStateUser.IsAuthenticated)
     {
         <div class="sidebar">
             <NavMenu />
@@ -11,7 +17,7 @@
 
         <main>
             <div class="top-row px-4">
-                <span>Bienvenido, <b>@AppState.Username</b></span>
+                <span>Bienvenido, <b>@AppStateUser.Username</b></span>
                 <button class="btn btn-link text-danger" @onclick="Logout">Cerrar Sesión</button>
             </div>
 
@@ -31,12 +37,18 @@
 @code {
     protected override void OnInitialized()
     {
-        AppState.PropertyChanged += (s, e) => StateHasChanged();
+        AppStateUser.PropertyChanged += (s, e) => StateHasChanged();
     }
 
     private void Logout()
     {
-        AppState.Logout();
+        AppStateUser.Logout();
+        AppStateBPMS.Logout();
+        AppStateSIM.Logout();
+        AppStateOpenComex.Logout();
+        AppStateAsisComex.Logout();
+        AppStateExternalCarrier.Logout();
+        AppStateUsersSystem.Logout();
         Navigation.NavigateTo("/");
     }
 }

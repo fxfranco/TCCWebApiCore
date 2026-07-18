@@ -1,7 +1,6 @@
 ﻿@page "/login"
 @inject IConfiguration Configuration
-@inject TCC.Web.InternalSystems.Services.AppStateService AppState
-@inject TCC.Web.InternalSystems.Services.AppStateServiceSIM AppStateSIM
+@inject TCC.Web.InternalSystems.Services.AppStateServiceUser AppStateUser
 
 <div class="card shadow" style="width: 24rem;">
     <div class="card-body">
@@ -36,11 +35,8 @@
 
         if (validUser != null)
         {
-            AppState.Username = validUser.Username;
-            AppState.Password = validUser.Password;
-
-            AppStateSIM.Username = validUser.Username;
-            AppStateSIM.Password = validUser.Password;
+            AppStateUser.Username = validUser.Username;
+            AppStateUser.Password = validUser.Password;
 
             errorMessage = null;
         }

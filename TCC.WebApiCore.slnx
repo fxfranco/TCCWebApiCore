@@ -1,6 +1,9 @@
 <Solution>
+  <Project Path="External.Api.SystemCarrier/External.Api.SystemCarrier.csproj" Id="c8ec5267-7452-437a-979c-2229934ab21c" />
+  <Project Path="TCC.Api.SystemFourAsisComex/TCC.Api.SystemFourAsisComex.csproj" />
   <Project Path="TCC.Api.SystemOneBPMS/TCC.Api.SystemOneBPMS.csproj" />
   <Project Path="TCC.Api.SystemThreeOpenComex/TCC.Api.SystemThreeOpenComex.csproj" Id="ec79e4c8-7173-4422-8ea1-36ae0dcb8a65" />
   <Project Path="TCC.Api.SystemTwoSIM/TCC.Api.SystemTwoSIM.csproj" Id="429baa33-6da4-457a-a1fe-3f25730d4ff4" />
+  <Project Path="TCC.Api.SystemUsers/TCC.Api.SystemUsers.csproj" Id="07fd518d-6f45-4699-925d-ab1ba3b0923f" />
   <Project Path="TCC.Web.InternalSystems/TCC.Web.InternalSystems.csproj" Id="bac61a5f-0f78-4b65-b1c2-20eb007a6067" />
 </Solution>

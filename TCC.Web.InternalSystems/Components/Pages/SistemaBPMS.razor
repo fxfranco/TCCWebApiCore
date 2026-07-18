@@ -2,32 +2,47 @@
 @using System.Net.Http.Headers
 @using System.Text.Json
 @inject IHttpClientFactory ClientFactory
-@inject TCC.Web.InternalSystems.Services.AppStateService AppState
+@inject TCC.Web.InternalSystems.Services.AppStateServiceUser AppStateUser
+@inject TCC.Web.InternalSystems.Services.AppStateServiceBPMS AppStateBPMS
 
-<h3>Panel de Control del Sistema</h3>
+<h3>Sistema BPMS</h3>
 <hr />
 
 <div class="row mb-4">
     <div class="col-md-12 d-flex gap-3">
         <!-- Botón 1: Obtener Token -->
-        <button class="btn btn-success" @onclick="ObtenerTokenAPI">
-            Obtener Token JWT
-        </button>
-
+        <div class="position-relative">
+            <button class="btn btn-success" @onclick="ObtenerTokenAPI">
+                Obtener Token JWT
+            </button>
+        </div>
         <!-- Botón 2: Input de Carga de Excel -->
         <div class="position-relative">
-            <button class="btn btn-primary @(string.IsNullOrEmpty(AppState.Token) ? "disabled" : "")" type="button">
+            <button class="btn btn-primary @(string.IsNullOrEmpty(AppStateBPMS.Token) ? "disabled" : "")" type="button">
                 Cargar Archivo Excel
             </button>
-            <InputFile OnChange="ProcesarExcel" class="position-absolute top-0 start-0 opacity-0 w-100 h-100" style="cursor:pointer;" disabled="@string.IsNullOrEmpty(AppState.Token)" />
+            <InputFile OnChange="ProcesarExcel" class="position-absolute top-0 start-0 opacity-0 w-100 h-100" style="cursor:pointer;" disabled="@string.IsNullOrEmpty(AppStateBPMS.Token)" />
+        </div>
+
+        <div class="position-relative">
+            <label class="form-label fw-bold">Ruta de guardado del Excel en el Servidor:</label>
+            <input type="text" class="form-control" placeholder="Ej: C:\BPMS\Archivos\Resultado.xlsx" @bind="rutaServidor" />
+        </div>
+
+        <div class="position-relative">
+            <button class="btn btn-primary" @onclick="EnviarDatosAPI" disabled="@(AppStateBPMS.ExcelData == null || !AppStateBPMS.ExcelData.Any())">
+                Guardar en Sistema
+            </button>
         </div>
 
         <!-- Botón Adicional: Limpiar Memoria -->
-        @if (AppState.ExcelData != null)
+        @if (AppStateBPMS.ExcelData != null)
         {
-            <button class="btn btn-secondary" @onclick="LimpiarDatos">
-                Limpiar Datos
-            </button>
+            <div class="position-relative">
+                <button class="btn btn-secondary" @onclick="LimpiarDatos">
+                    Limpiar Datos
+                </button>
+            </div>
         }
     </div>
 </div>
@@ -36,7 +51,7 @@
 <div class="mb-3">
     <p>
         Estado del Token:
-        @if (!string.IsNullOrEmpty(AppState.Token))
+        @if (!string.IsNullOrEmpty(AppStateBPMS.Token))
         {
             <span class="badge bg-success">Cargado en Memoria</span>
         }
@@ -57,47 +72,237 @@
 }
 
 <!-- Cuadrícula / Grid de datos Dinámica -->
-@if (AppState.ExcelData != null && AppState.ExcelData.Any())
+@if (AppStateBPMS.ExcelData != null && AppStateBPMS.ExcelData.Any())
 {
+
+    <!-- Botón para abrir el modal de Agregar arriba de la tabla -->
+    <div class="mb-3 d-flex justify-content-end">
+        <button class="btn btn-primary" @onclick="AbrirModalAgregar">
+            <i class="bi bi-plus-circle"></i> Agregar Registro
+        </button>
+    </div>
+
+    <!-- Controles de configuración de página -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <label for="pageSizeSelect" class="form-label mb-0 text-nowrap">Registros por página:</label>
+            <select id="pageSizeSelect" class="form-select form-select-sm" style="width: auto;" @onchange="OnPageSizeChanged">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+
+        <span class="text-muted small">
+            Mostrando registros del @(InicioRegistro) al @(FinRegistro) de un total de @(TotalRegistros)
+        </span>
+    </div>
     <div class="table-responsive shadow-sm rounded">
         <table class="table table-striped table-bordered">
             <thead class="table-dark">
                 <tr>
-                    <!-- Obtenemos los encabezados de la primera fila disponible -->
-                    @foreach (var key in AppState.ExcelData.First(r => r.Keys.Any()).Keys)
+                    @foreach (var columna in Columnas)
                     {
-                        <th>@key</th>
+                        <th>@columna</th>
                     }
+                    <!-- Nueva columna fija para acciones -->
+                    <th class="text-center" style="width: 150px;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var row in AppState.ExcelData)
+                @foreach (var fila in PaginaActual)
                 {
                     <tr>
-                        @foreach (var value in row.Values)
+                        @foreach (var columna in Columnas)
                         {
-                            <!-- Manejo de nulos por si el string viene vacío de la API -->
-                            <td>@(value ?? string.Empty)</td>
+                            // Si la fila no contiene la columna, mostramos vacío
+                            <td>@(fila.ContainsKey(columna) ? fila[columna] : string.Empty)</td>
                         }
+                        <!-- Botones de Acción pasando la fila actual -->
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-warning me-1" @onclick="() => AbrirModalEditar(fila)">
+                                Editar
+                            </button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => EliminarRegistro(fila)">
+                                Eliminar
+                            </button>
+                        </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
+    <!-- Controles de Paginación -->
+    <nav aria-label="Navegación de tabla" class="d-flex justify-content-center mt-3">
+        <ul class="pagination">
+            <!-- Primero -->
+            <li class="page-item @(PaginaIndex == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="() => IrAPagina(1)" title="Primera página">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </button>
+            </li>
+            <!-- Anterior -->
+            <li class="page-item @(PaginaIndex == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="() => IrAPagina(PaginaIndex - 1)" title="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </button>
+            </li>
+
+            <!-- Páginas Numéricas (Opcional, pero muy útil) -->
+            @for (int i = Math.Max(1, PaginaIndex - 2); i <= Math.Min(TotalPaginas, PaginaIndex + 2); i++)
+            {
+                var numeroPagina = i;
+                <li class="page-item @(PaginaIndex == numeroPagina ? "active" : "")">
+                    <button class="page-link" @onclick="() => IrAPagina(numeroPagina)">@numeroPagina</button>
+                </li>
+            }
+
+            <!-- Siguiente -->
+            <li class="page-item @(PaginaIndex == TotalPaginas ? "disabled" : "")">
+                <button class="page-link" @onclick="() => IrAPagina(PaginaIndex + 1)" title="Siguiente">
+                    <span aria-hidden="true">&raquo;</span>
+                </button>
+            </li>
+            <!-- Último -->
+            <li class="page-item @(PaginaIndex == TotalPaginas ? "disabled" : "")">
+                <button class="page-link" @onclick="() => IrAPagina(TotalPaginas)" title="Última página">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </button>
+            </li>
+        </ul>
+    </nav>
 }
-else if (AppState.ExcelData != null)
+else if (AppStateBPMS.ExcelData != null)
 {
     <div class="alert alert-warning">El archivo se leyó con éxito pero no devolvió registros válidos.</div>
+}
+
+<!-- Modal de Bootstrap controlado por Blazor -->
+@if (mostrarModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">@(esModoEdicion ? "Modificar Registro" : "Agregar Nuevo Registro")</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CerrarModal"></button>
+                </div>
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+
+                    @foreach (var columna in Columnas)
+                    {
+                        var col = columna;
+                        var esID = Columnas.IndexOf(col) == 0; // Sigue siendo la primera columna
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">@col</label>
+
+                            @if (esID)
+                            {
+                                <!-- El ID SIEMPRE estará deshabilitado para el usuario (al agregar o editar) -->
+                                <input type="text" class="form-control bg-light text-muted" value="@FilaFormulario[col]" disabled />
+                            }
+                            else
+                            {
+                                <!-- Inputs normales para el resto de columnas -->
+                                <input type="text" class="form-control"
+                                       value="@FilaFormulario[col]"
+                                       @onchange="(e) => ActualizarCampoFormulario(col, e.Value?.ToString())" />
+                            }
+                        </div>
+                    }
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CerrarModal">Cancelar</button>
+                    <button type="button" class="btn btn-success" @onclick="GuardarCambios">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
     private string? infoMessage;
     private string? errorMessage;
 
+    // 1. Datos e Infraestructura Dinámica
+    // private List<Dictionary<string, string?>> DatosOriginales = new();
+    private List<string> Columnas = new();
+
+    // 2. Estado de la Paginación
+    private int PaginaIndex { get; set; } = 1;
+    private int RegistrosPorPagina { get; set; } = 10;
+
+    // Propiedades calculadas útiles
+    private int TotalRegistros { get; set; } = 0;
+    private int TotalPaginas { get; set; } = 0;
+
+    private int InicioRegistro { get; set; } = 0;
+    private int FinRegistro { get; set; } = 0;
+
+    // 3. Segmentación en memoria de la página actual
+    private IEnumerable<Dictionary<string, string?>> PaginaActual = new List<Dictionary<string, string?>>();
+
+    // --- VARIABLES PARA EL MODAL ---
+    private bool mostrarModal = false;
+    private bool esModoEdicion = false;
+
+    // Diccionario temporal que almacena los datos que el usuario digita en el modal
+    private Dictionary<string, string?> FilaFormulario = new();
+
+    private string rutaServidor = string.Empty;
+
     protected override void OnInitialized()
     {
         // Re-suscripción para redibujar si el servicio muta externamente
-        AppState.PropertyChanged += (s, e) => StateHasChanged();
+        AppStateBPMS.PropertyChanged += (s, e) => StateHasChanged();
+        ExtraerColumnas();
+    }
+
+    private async Task EnviarDatosAPI()
+    {
+        try
+        {
+            errorMessage = null;
+            if (string.IsNullOrWhiteSpace(rutaServidor))
+            {
+                errorMessage = "Por favor, especifica una ruta válida para guardar el archivo.";
+                return;
+            }
+
+            infoMessage = "Enviando registros a la API y procesando el archivo...";
+
+            var client = ClientFactory.CreateClient("BPMSApi");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AppStateBPMS.Token);
+
+            // Preparamos el payload con los datos de memoria actuales
+            var payload = new GuardarDatosRequest
+            {
+                RutaArchivo = rutaServidor,
+                Registros = AppStateBPMS.ExcelData ?? new List<Dictionary<string, string?>>()
+            };
+
+            var response = await client.PostAsJsonAsync("api/excelfields/save-in-memory", payload);
+
+            if (response.IsSuccessStatusCode)
+            {
+                infoMessage = "¡Datos guardados con éxito en la API y archivo Excel generado correctamente en el servidor!";
+            }
+            else
+            {
+                var apiError = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Error de la API ({response.StatusCode}): {apiError}";
+                infoMessage = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al intentar conectar con la API: {ex.Message}";
+            infoMessage = null;
+        }
     }
 
     private async Task ObtenerTokenAPI()
@@ -109,7 +314,7 @@ else if (AppState.ExcelData != null)
             var client = ClientFactory.CreateClient("BPMSApi");
 
             // Cuerpo del login requerido por tu AuthController (ajusta según tus DTOs reales)
-            var loginPayload = new { Username = AppState.Username, Password = AppState.Password };
+            var loginPayload = new { Username = AppStateUser.Username, Password = AppStateUser.Password };
             var response = await client.PostAsJsonAsync("api/auth/login", loginPayload);
 
             if (response.IsSuccessStatusCode)
@@ -118,12 +323,12 @@ else if (AppState.ExcelData != null)
                 // Suponiendo que el JSON responde con {"token": "ey..."} o similar
                 if (content.TryGetProperty("token", out var tokenProp))
                 {
-                    AppState.Token = tokenProp.GetString();
+                    AppStateBPMS.Token = tokenProp.GetString();
                     infoMessage = "¡Token obtenido con éxito y guardado en memoria!";
                 }
                 else
                 {
-                    AppState.Token = content.ToString(); // Fallback si viene en texto plano o string raíz
+                    AppStateBPMS.Token = content.ToString(); // Fallback si viene en texto plano o string raíz
                     infoMessage = "¡Token obtenido con éxito!";
                 }
             }
@@ -152,14 +357,14 @@ else if (AppState.ExcelData != null)
 
             var client = ClientFactory.CreateClient("BPMSApi");
             // Adjuntar el JWT obtenido previamente en la cabecera Authorization
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AppState.Token);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AppStateBPMS.Token);
 
             // Preparar el archivo multipart/form-data para consumir el endpoint "extract"
             using var content = new MultipartFormDataContent();
             var fileStream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // Máx 10MB
             var streamContent = new StreamContent(fileStream);
             streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
-            
+
             // "file" debe coincidir con el nombre del parámetro IFormFile en el controlador de tu API
             content.Add(streamContent, "ExcelFile", file.Name);
 
@@ -178,8 +383,8 @@ else if (AppState.ExcelData != null)
                 if (apiResponse != null)
                 {
                     // Asignamos la propiedad 'Rows' a nuestro estado en memoria
-                    AppState.ExcelData = apiResponse.Rows;
-        
+                    AppStateBPMS.ExcelData = apiResponse.Rows;
+
                     // Opcional: Puedes mostrar alertas si faltaron columnas en el Excel
                     if (apiResponse.MissingColumns.Any())
                     {
@@ -192,8 +397,8 @@ else if (AppState.ExcelData != null)
                 }
 
                 // var deserialized = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(rawJson);
-                
-                // AppState.ExcelData = deserialized;
+
+                // AppStateBPMS.ExcelData = deserialized;
                 // infoMessage = "¡Excel procesado con éxito! Datos almacenados en memoria.";
             }
             else
@@ -201,6 +406,7 @@ else if (AppState.ExcelData != null)
                 errorMessage = $"Error al procesar el Excel en el API: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
                 infoMessage = null;
             }
+            ExtraerColumnas();
         }
         catch (Exception ex)
         {
@@ -211,9 +417,187 @@ else if (AppState.ExcelData != null)
 
     private void LimpiarDatos()
     {
-        AppState.ClearData();
+        AppStateBPMS.ClearData();
         infoMessage = "Memoria de datos del Excel limpiada.";
         errorMessage = null;
+    }
+
+    private void ExtraerColumnas()
+    {
+        if (AppStateBPMS.ExcelData != null && AppStateBPMS.ExcelData.Any())
+        {
+            TotalRegistros = AppStateBPMS.ExcelData.Count;
+            TotalPaginas = (int)Math.Ceiling((double)TotalRegistros / RegistrosPorPagina);
+            InicioRegistro = TotalRegistros == 0 ? 0 : ((PaginaIndex - 1) * RegistrosPorPagina) + 1;
+            FinRegistro = Math.Min(PaginaIndex * RegistrosPorPagina, TotalRegistros);
+
+            // 3. Segmentación en memoria de la página actual
+            PaginaActual = AppStateBPMS.ExcelData
+                .Skip((PaginaIndex - 1) * RegistrosPorPagina)
+                .Take(RegistrosPorPagina);
+
+            // Extrae todas las llaves distintas que existen en la lista de diccionarios
+            Columnas = AppStateBPMS.ExcelData
+                .SelectMany(d => d.Keys)
+                .Distinct()
+                .ToList();
+        }
+    }
+
+    private void IrAPagina(int nuevaPagina)
+    {
+        if (nuevaPagina >= 1 && nuevaPagina <= TotalPaginas)
+        {
+            PaginaIndex = nuevaPagina;
+        }
+        ExtraerColumnas();
+    }
+
+    private void OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int nuevoTamano))
+        {
+            RegistrosPorPagina = nuevoTamano;
+            PaginaIndex = 1; // Reiniciamos a la primera página al cambiar el tamaño de visualización
+        }
+        ExtraerColumnas();
+    }
+
+    // Abre el modal limpio para insertar uno nuevo
+    private void AbrirModalAgregar()
+    {
+        esModoEdicion = false;
+        FilaFormulario = new Dictionary<string, string?>();
+
+        // Inicializamos todas las columnas del formulario en vacío
+        foreach (var col in Columnas)
+        {
+            FilaFormulario[col] = string.Empty;
+        }
+
+        // --- LÓGICA DE AUTO-INCREMENTO DEL ID ---
+        string columnaId = Columnas.First(); // Obtenemos el nombre de la primera columna (ID)
+        int nuevoId = 1; // Valor por defecto si la tabla está vacía
+
+        if (AppStateBPMS.ExcelData != null && AppStateBPMS.ExcelData.Any())
+        {
+            // Buscamos todos los IDs existentes, intentamos convertirlos a entero y obtenemos el máximo
+            var maxId = AppStateBPMS.ExcelData
+                .Select(r => r.ContainsKey(columnaId) && int.TryParse(r[columnaId], out int idActual) ? idActual : 0)
+                .DefaultIfEmpty(0)
+                .Max();
+
+            nuevoId = maxId + 1;
+        }
+
+        // Asignamos el nuevo ID calculado al diccionario del formulario
+        FilaFormulario[columnaId] = nuevoId.ToString();
+
+        mostrarModal = true;
+    }
+
+    // Abre el modal clonando los datos de la fila seleccionada
+    private void AbrirModalEditar(Dictionary<string, string?> filaSeleccionada)
+    {
+        esModoEdicion = true;
+        FilaFormulario = new Dictionary<string, string?>();
+
+        // Clonamos los valores para no modificar la tabla directamente hasta dar "Guardar"
+        foreach (var col in Columnas)
+        {
+            FilaFormulario[col] = filaSeleccionada.ContainsKey(col) ? filaSeleccionada[col] : string.Empty;
+        }
+
+        mostrarModal = true;
+    }
+
+    private void CerrarModal()
+    {
+        mostrarModal = false;
+    }
+
+    // Actualiza el diccionario temporal cuando el usuario escribe en los inputs
+    private void ActualizarCampoFormulario(string columna, string? valor)
+    {
+        FilaFormulario[columna] = valor;
+    }
+
+    // Procesa la inserción o la actualización en memoria
+    private void GuardarCambios()
+    {
+        errorMessage = null;
+        string columnaId = Columnas.First(); // Tu primera columna fija es el ID
+        string? idFormulario = FilaFormulario[columnaId];
+
+        if (string.IsNullOrWhiteSpace(idFormulario))
+        {
+            errorMessage = $"El campo {columnaId} es obligatorio.";
+            return;
+        }
+
+        if (AppStateBPMS.ExcelData == null) AppStateBPMS.ExcelData = new List<Dictionary<string, string?>>();
+
+        if (esModoEdicion)
+        {
+            // Buscar el registro original por su ID
+            var registroOriginal = AppStateBPMS.ExcelData.FirstOrDefault(r => r.ContainsKey(columnaId) && r[columnaId] == idFormulario);
+
+            if (registroOriginal != null)
+            {
+                // Reemplazar los valores en memoria
+                foreach (var col in Columnas)
+                {
+                    registroOriginal[col] = FilaFormulario[col];
+                }
+                infoMessage = "Registro modificado correctamente en memoria.";
+            }
+        }
+        else
+        {
+            // Validar que el ID no exista previamente (Evitar duplicados)
+            bool existeId = AppStateBPMS.ExcelData.Any(r => r.ContainsKey(columnaId) && r[columnaId] == idFormulario);
+            if (existeId)
+            {
+                errorMessage = $"Ya existe un registro con el ID: {idFormulario}.";
+                return;
+            }
+
+            // Insertar el nuevo diccionario clonado a la lista global
+            AppStateBPMS.ExcelData.Add(new Dictionary<string, string?>(FilaFormulario));
+            infoMessage = "Nuevo registro agregado correctamente en memoria.";
+        }
+
+        cerrarModalGuardar();
+    }
+
+    private void EliminarRegistro(Dictionary<string, string?> fila)
+    {
+        string columnaId = Columnas.First();
+        if (fila.ContainsKey(columnaId) && AppStateBPMS.ExcelData != null)
+        {
+            string? idAEliminar = fila[columnaId];
+            var registro = AppStateBPMS.ExcelData.FirstOrDefault(r => r.ContainsKey(columnaId) && r[columnaId] == idAEliminar);
+
+            if (registro != null)
+            {
+                AppStateBPMS.ExcelData.Remove(registro);
+                infoMessage = $"Registro con ID {idAEliminar} eliminado de la memoria.";
+
+                // Si borramos el último registro de una página, reajustamos el índice
+                ExtraerColumnas();
+                if (!PaginaActual.Any() && PaginaIndex > 1)
+                {
+                    PaginaIndex--;
+                }
+                ExtraerColumnas();
+            }
+        }
+    }
+
+    private void cerrarModalGuardar()
+    {
+        mostrarModal = false;
+        ExtraerColumnas(); // Recalcula la paginación y refresca la vista de la tabla
     }
 
     public class ExcelFieldsResponse
@@ -221,5 +605,11 @@ else if (AppState.ExcelData != null)
         public List<string> RequestedFields { get; set; } = new();
         public List<string> MissingColumns { get; set; } = new();
         public List<Dictionary<string, string?>> Rows { get; set; } = new();
+    }
+
+    public class GuardarDatosRequest
+    {
+        public string RutaArchivo { get; set; } = string.Empty;
+        public List<Dictionary<string, string?>> Registros { get; set; } = new();
     }
 }
