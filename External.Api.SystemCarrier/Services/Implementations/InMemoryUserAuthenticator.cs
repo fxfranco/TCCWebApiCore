@@ -11,23 +11,27 @@ namespace External.Api.SystemCarrier.Services.Implementations;
 /// </summary>
 public class InMemoryUserAuthenticator : IUserAuthenticator
 {
-    private sealed record UserRecord(string Password, string[] Roles);
-
-    private static readonly Dictionary<string, UserRecord> Users = new(StringComparer.OrdinalIgnoreCase)
+    private readonly IConfiguration _configuration;
+    public InMemoryUserAuthenticator(IConfiguration configuration)
     {
-        ["admin"] = new UserRecord("Admin123!", new[] { "Admin" }),
-        ["user"] = new UserRecord("User123!", new[] { "User" })
-    };
+        _configuration = configuration;
+    }
+
+    private sealed record UserRecord(string Password, string[] Roles);
 
     public Task<AuthenticatedUser?> ValidateAsync(string username, string password, CancellationToken cancellationToken = default)
     {
-        if (!string.IsNullOrWhiteSpace(username)
-            && Users.TryGetValue(username, out var record)
-            && record.Password == password)
-        {
-            return Task.FromResult<AuthenticatedUser?>(new AuthenticatedUser(username, record.Roles));
-        }
+        var users = _configuration.GetSection("Users").Get<List<UserConfig>>();
 
-        return Task.FromResult<AuthenticatedUser?>(null);
+        var validUser = users?.FirstOrDefault(u => u.Username == username && u.Password == password);
+
+        if (validUser != null)
+        {
+            return Task.FromResult<AuthenticatedUser?>(new AuthenticatedUser(username, []));
+        }
+        else
+        {
+            return Task.FromResult<AuthenticatedUser?>(null);
+        }
     }
 }

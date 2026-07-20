@@ -11,6 +11,8 @@ builder.Services.AddControllers();
 builder.Services.AddApplicationServices();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
+builder.Configuration.AddJsonFile("Data\\appusers.json", optional: false, reloadOnChange: true);
+
 // Registrar como Singleton para que la memoria sea compartida de forma global
 builder.Services.AddSingleton<InMemoryExcelStorage>();
 
