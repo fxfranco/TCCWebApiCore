@@ -9,37 +9,25 @@ builder.Services.AddRazorComponents()
 
 builder.Configuration.AddJsonFile("Data\\appusers.json", optional: false, reloadOnChange: true);
 
+// Leer la URL desde el archivo de configuración
+// 1. Obtener la sección completa de configuraciones como un diccionario
 // Cambia la URL por el puerto real de tu API .NET 10 (ver launchSettings.json de la API)
-builder.Services.AddHttpClient("BPMSApi", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:44313/");
-    //client.BaseAddress = new Uri("http://localhost:5080/");
-});
+var apiSettings = builder.Configuration.GetSection("ApiSettings").Get<Dictionary<string, string>>();
 
-builder.Services.AddHttpClient("SIMApi", client =>
+if (apiSettings != null)
 {
-    client.BaseAddress = new Uri("https://localhost:44314/");
-});
-
-builder.Services.AddHttpClient("OpenComexApi", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:44315/");
-});
-
-builder.Services.AddHttpClient("AsisComexApi", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:44316/");
-});
-
-builder.Services.AddHttpClient("ExternalCarrierApi", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:44317/");
-});
-
-builder.Services.AddHttpClient("UsersSystemApi", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:44318/");
-});
+    // 2. Recorrer el diccionario y registrar cada HttpClient dinámicamente
+    foreach (var api in apiSettings)
+    {
+        builder.Services.AddHttpClient(api.Key, client =>
+        {
+            if (!string.IsNullOrEmpty(api.Value))
+            {
+                client.BaseAddress = new Uri(api.Value);
+            }
+        });
+    }
+}
 
 builder.Services.AddScoped<AppStateServiceUser>();
 builder.Services.AddScoped<AppStateServiceBPMS>();
