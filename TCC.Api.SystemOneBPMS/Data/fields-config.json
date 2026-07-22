@@ -1,48 +1,140 @@
 {
   "fields": [
     {
-      "name": "Id",
-      "column": "Id"
+      "name": "ID",
+      "column": "ID"
     },
     {
-      "name": "Nombre",
-      "column": "Nombre"
+      "name": "TIPO DE OPERACIÓN (IMPO - EXPO)",
+      "column": "TIPO DE OPERACIÓN (IMPO - EXPO)"
     },
     {
-      "name": "Apellido",
-      "column": "Apellido"
+      "name": "MODALIDAD (AIR - SEA)",
+      "column": "MODALIDAD (AIR - SEA)"
     },
     {
-      "name": "Estado",
-      "column": "Estado"
+      "name": "INCOTERM",
+      "column": "INCOTERM"
     },
     {
-      "name": "Accion",
-      "column": "Accion"
+      "name": "PROVEEDOR",
+      "column": "PROVEEDOR"
     },
     {
-      "name": "Origen",
-      "column": "Origen"
+      "name": "CLIENTE",
+      "column": "CLIENTE"
     },
     {
-      "name": "Email",
-      "column": "Email"
+      "name": "ORIGEN",
+      "column": "ORIGEN"
     },
     {
-      "name": "Departamento",
-      "column": "Departamento"
+      "name": "DESTINO",
+      "column": "DESTINO"
     },
     {
-      "name": "Salario",
-      "column": "Salario"
+      "name": "DESCRIPCIÓN DE LA MERCANCÍA",
+      "column": "DESCRIPCIÓN DE LA MERCANCÍA"
     },
     {
-      "name": "eta",
-      "column": "eta"
+      "name": "TIPO DE CARGA (FCL - LCL)",
+      "column": "TIPO DE CARGA (FCL - LCL)"
     },
     {
-      "name": "Sistema",
-      "column": "Sistema"
+      "name": "TIPO DE CONTENEDOR",
+      "column": "TIPO DE CONTENEDOR"
+    },
+    {
+      "name": "CANTIDAD CONTENEDORES",
+      "column": "CANTIDAD CONTENEDORES"
+    },
+    {
+      "name": "NÚMERO CONTENEDOR",
+      "column": "NÚMERO CONTENEDOR"
+    },
+    {
+      "name": "CANTIDAD BULTOS",
+      "column": "CANTIDAD BULTOS"
+    },
+    {
+      "name": "PESO (kg)",
+      "column": "PESO (kg)"
+    },
+    {
+      "name": "VOLUMEN (m3)",
+      "column": "VOLUMEN (m3)"
+    },
+    {
+      "name": "TRANSPORTISTA",
+      "column": "TRANSPORTISTA"
+    },
+    {
+      "name": "TIPO DOCUMENTO",
+      "column": "TIPO DOCUMENTO"
+    },
+    {
+      "name": "NOMBRE DOCUMENTO",
+      "column": "NOMBRE DOCUMENTO"
+    },
+    {
+      "name": "DOCUMENTO DE TRANSPORTE (HBL)",
+      "column": "DOCUMENTO DE TRANSPORTE (HBL)"
+    },
+    {
+      "name": "DIAS LIBRES",
+      "column": "DIAS LIBRES"
+    },
+    {
+      "name": "CANT. DIAS RESTANTES ENTREGA CONTENEDOR",
+      "column": "CANT. DIAS RESTANTES ENTREGA CONTENEDOR"
+    },
+    {
+      "name": "CANT. DIAS DEMORAS CONTENEDOR",
+      "column": "CANT. DIAS DEMORAS CONTENEDOR"
+    },
+    {
+      "name": "VALOR POR DIA DEMORAS CONTENEDOR",
+      "column": "VALOR POR DIA DEMORAS CONTENEDOR"
+    },
+    {
+      "name": "VALOR TOTAL DEMORAS CONTENEDOR",
+      "column": "VALOR TOTAL DEMORAS CONTENEDOR"
+    },
+    {
+      "name": "DEPOSITO CONTEDOR",
+      "column": "DEPOSITO CONTEDOR"
+    },
+    {
+      "name": "FACTURA PROVEEDOR",
+      "column": "FACTURA PROVEEDOR"
+    },
+    {
+      "name": "FACTURA TCC",
+      "column": "FACTURA TCC"
+    },
+    {
+      "name": "NÚMERO FACTURA",
+      "column": "NÚMERO FACTURA"
+    },
+    {
+      "name": "DESCRIPCIÓN GASTO",
+      "column": "DESCRIPCIÓN GASTO"
+    },
+    {
+      "name": "VALOR GASTO (USD)",
+      "column": "VALOR GASTO (USD)"
+    },
+    {
+      "name": "SUBTOTAL FACTURA (USD)",
+      "column": "SUBTOTAL FACTURA (USD)"
+    },
+    {
+      "name": "IVA (USD)",
+      "column": "IVA (USD)"
+    },
+    {
+      "name": "TOTAL FACTURA (USD)",
+      "column": "TOTAL FACTURA (USD)"
     }
   ]
 }

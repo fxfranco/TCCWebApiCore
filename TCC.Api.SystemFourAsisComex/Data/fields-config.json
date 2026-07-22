@@ -1,12 +1,72 @@
 {
   "fields": [
-    { "name": "Id", "column": "Id" },
-    { "name": "Nombre", "column": "Nombre" },
-    { "name": "Apellido", "column": "Apellido" },
-    { "name": "Email", "column": "Email" },
-    { "name": "Departamento", "column": "Departamento" },
-    { "name": "Salario", "column": "Salario" },
-    { "name": "eta", "column": "eta" },
-    { "name": "Sistema", "column": "Sistema" }
+    {
+      "name": "ID",
+      "column": "ID"
+    },
+    {
+      "name": "TIPO DE OPERACIÓN (IMPO - EXPO)",
+      "column": "TIPO DE OPERACIÓN (IMPO - EXPO)"
+    },
+    {
+      "name": "MODALIDAD (AIR - SEA)",
+      "column": "MODALIDAD (AIR - SEA)"
+    },
+    {
+      "name": "INCOTERM",
+      "column": "INCOTERM"
+    },
+    {
+      "name": "PROVEEDOR",
+      "column": "PROVEEDOR"
+    },
+    {
+      "name": "CLIENTE",
+      "column": "CLIENTE"
+    },
+    {
+      "name": "ORIGEN",
+      "column": "ORIGEN"
+    },
+    {
+      "name": "DESTINO",
+      "column": "DESTINO"
+    },
+    {
+      "name": "DESCRIPCIÓN DE LA MERCANCÍA",
+      "column": "DESCRIPCIÓN DE LA MERCANCÍA"
+    },
+    {
+      "name": "TIPO DE CARGA (FCL - LCL)",
+      "column": "TIPO DE CARGA (FCL - LCL)"
+    },
+    {
+      "name": "TIPO DE CONTENEDOR",
+      "column": "TIPO DE CONTENEDOR"
+    },
+    {
+      "name": "CANTIDAD CONTENEDORES",
+      "column": "CANTIDAD CONTENEDORES"
+    },
+    {
+      "name": "NÚMERO CONTENEDOR",
+      "column": "NÚMERO CONTENEDOR"
+    },
+    {
+      "name": "CANTIDAD BULTOS",
+      "column": "CANTIDAD BULTOS"
+    },
+    {
+      "name": "PESO (kg)",
+      "column": "PESO (kg)"
+    },
+    {
+      "name": "VOLUMEN (m3)",
+      "column": "VOLUMEN (m3)"
+    },
+    {
+      "name": "TRANSPORTISTA",
+      "column": "TRANSPORTISTA"
+    }
   ]
 }

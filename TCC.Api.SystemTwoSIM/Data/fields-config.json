@@ -1,12 +1,124 @@
 {
   "fields": [
-    { "name": "Id", "column": "Id" },
-    { "name": "Nombre", "column": "Nombre" },
-    { "name": "Apellido", "column": "Apellido" },
-    { "name": "Email", "column": "Email" },
-    { "name": "Departamento", "column": "Departamento" },
-    { "name": "Salario", "column": "Salario" },
-    { "name": "eta", "column": "eta" },
-    { "name": "Sistema", "column": "Sistema" }
+    {
+      "name": "ID",
+      "column": "ID"
+    },
+    {
+      "name": "TIPO DE OPERACIÓN (IMPO - EXPO)",
+      "column": "TIPO DE OPERACIÓN (IMPO - EXPO)"
+    },
+    {
+      "name": "MODALIDAD (AIR - SEA)",
+      "column": "MODALIDAD (AIR - SEA)"
+    },
+    {
+      "name": "INCOTERM",
+      "column": "INCOTERM"
+    },
+    {
+      "name": "PROVEEDOR",
+      "column": "PROVEEDOR"
+    },
+    {
+      "name": "CLIENTE",
+      "column": "CLIENTE"
+    },
+    {
+      "name": "ORIGEN",
+      "column": "ORIGEN"
+    },
+    {
+      "name": "DESTINO",
+      "column": "DESTINO"
+    },
+    {
+      "name": "TIPO DE CARGA (FCL - LCL)",
+      "column": "TIPO DE CARGA (FCL - LCL)"
+    },
+    {
+      "name": "TIPO DE CONTENEDOR",
+      "column": "TIPO DE CONTENEDOR"
+    },
+    {
+      "name": "CANTIDAD BULTOS",
+      "column": "CANTIDAD BULTOS"
+    },
+    {
+      "name": "PESO (kg)",
+      "column": "PESO (kg)"
+    },
+    {
+      "name": "VOLUMEN (m3)",
+      "column": "VOLUMEN (m3)"
+    },
+    {
+      "name": "DOCUMENTO DE TRANSPORTE (HBL)",
+      "column": "DOCUMENTO DE TRANSPORTE (HBL)"
+    },
+    {
+      "name": "FECHA BODEGA ORIGEN",
+      "column": "FECHA BODEGA ORIGEN"
+    },
+    {
+      "name": "ETD (Fecha Estimada Salida)",
+      "column": "ETD (Fecha Estimada Salida)"
+    },
+    {
+      "name": "ATD (Fecha Real Salida)",
+      "column": "ATD (Fecha Real Salida)"
+    },
+    {
+      "name": "ETA (Fecha Estimada Llegada)",
+      "column": "ETA (Fecha Estimada Llegada)"
+    },
+    {
+      "name": "ATA (Fecha Real Llegada)",
+      "column": "ATA (Fecha Real Llegada)"
+    },
+    {
+      "name": "FECHA BODEGA DESTINO",
+      "column": "FECHA BODEGA DESTINO"
+    },
+    {
+      "name": "FECHA DE NACIONALIZACION",
+      "column": "FECHA DE NACIONALIZACION"
+    },
+    {
+      "name": "FECHA DESPACHO (DESTINO)",
+      "column": "FECHA DESPACHO (DESTINO)"
+    },
+    {
+      "name": "FECHA PLANILLA",
+      "column": "FECHA PLANILLA"
+    },
+    {
+      "name": "FECHA ENTREGA CONTENEDOR",
+      "column": "FECHA ENTREGA CONTENEDOR"
+    },
+    {
+      "name": "FECHA DE DEVOLUCIÓN REAL CONTENEDOR",
+      "column": "FECHA DE DEVOLUCIÓN REAL CONTENEDOR"
+    },
+    {
+      "name": "FECHA SOLICITUD ANTICIPO",
+      "column": "FECHA SOLICITUD ANTICIPO"
+    },
+    {
+      "name": "FECHA PAGO ANTICIPO",
+      "column": "FECHA PAGO ANTICIPO"
+    },
+    {
+      "name": "FECHA FACTURA",
+      "column": "FECHA FACTURA"
+    },
+    {
+      "name": "COMENTARIO",
+      "column": "COMENTARIO"
+    },
+    {
+      "name": "FECHA COMENTARIO",
+      "column": "FECHA COMENTARIO"
+    }
   ]
 }
