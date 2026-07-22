@@ -27,7 +27,7 @@ jobs:
     strategy:
       # Define aquí la lista de todas tus APIs
       matrix:
-        api: [TCC.Api.SystemOneBPMS, TCC.Api.SystemTwoSIM, TCC.Api.SystemThreeOpenComex, TCC.Api.SystemFourAsisComex, External.Api.SystemCarrier, TCC.Api.SystemUsers] 
+        api: [TCC.Api.SystemOneBPMS, TCC.Api.SystemTwoSIM, TCC.Api.SystemThreeOpenComex, TCC.Api.SystemFourAsisComex, External.Api.SystemCarrier, TCC.Api.SystemUsers, TCC.Web.InternalSystems] 
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
