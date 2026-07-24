@@ -126,4 +126,3 @@ Para detener la ejecución de todos los servicios asociados a la solución, pued
 * **Opción B:** Ejecutar el archivo **`StopApis_TCCWebApiCore.bat`**, el cual enviará la señal de cierre a los procesos activos de manera controlada.
 
 ---
-*Documentación generada para el repositorio TCCWebApiCore.*
