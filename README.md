@@ -36,7 +36,7 @@ UBICACIONSELECCIONADA\
 ---
 
 ### **Paso 3: Ubicar los scripts de automatización (.bat)**
-Copie los archivos de control `StartApis_TCCWebApiCore.bat` y `StopApis_TCCWebApiCore.bat` directamente en la raíz de la ruta `UBICACIONSELECCIONADA\TCCWebApiCore`. 
+En el repositorio en la carpeta `Documents` descargue y copie los archivos de control `StartApis_TCCWebApiCore.bat` y `StopApis_TCCWebApiCore.bat` directamente en la raíz de la ruta `UBICACIONSELECCIONADA\TCCWebApiCore`. 
 
 Deben quedar ubicados al mismo nivel que las subcarpetas `Apis` y `Web`:
 
