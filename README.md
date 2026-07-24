@@ -27,7 +27,11 @@ Descargue e instale el **SDK x64 de .NET en su versión .NET 10** en la máquina
 Elija una ubicación en su sistema (por ejemplo, `C:\Servicios` o `D:\Publicaciones`) donde se instalarán las APIs y aplicaciones web. Dentro de la ubicación seleccionada, cree la siguiente estructura jerárquica de carpetas:
 
 ```text
-UBICACIONSELECCIONADA└── TCCWebApiCore    ├── Apis    └── Web```
+UBICACIONSELECCIONADA\
+└── TCCWebApiCore\
+    ├── Apis\
+    └── Web\
+```
 
 ---
 
@@ -37,10 +41,12 @@ Copie los archivos de control `StartApis_TCCWebApiCore.bat` y `StopApis_TCCWebAp
 Deben quedar ubicados al mismo nivel que las subcarpetas `Apis` y `Web`:
 
 ```text
-UBICACIONSELECCIONADA\TCCWebApiCore├── Apis├── Web├── StartApis_TCCWebApiCore.bat
+UBICACIONSELECCIONADA\TCCWebApiCore\
+├── Apis\
+├── Web\
+├── StartApis_TCCWebApiCore.bat
 └── StopApis_TCCWebApiCore.bat
 ```
-
 ---
 
 ### **Paso 4: Descargar los paquetes de publicación desde GitHub Actions**
@@ -57,7 +63,8 @@ Acceda al repositorio de GitHub Actions para descargar los artefactos (archivos 
 3. Ubique los archivos descomprimidos dentro de la carpeta `Web`, alojados en una nueva subcarpeta con el mismo nombre del componente:
 
 ```text
-UBICACIONSELECCIONADA\TCCWebApiCore\Web\TCC.Web.InternalSystems```
+UBICACIONSELECCIONADA\TCCWebApiCore\Web\TCC.Web.InternalSystems\
+```
 
 ---
 
@@ -68,11 +75,19 @@ Para todos los demás paquetes de API descargados:
 3. Coloque el contenido descomprimido en su subcarpeta correspondiente.
 
 **Ejemplo de la estructura final esperada:**
+
 ```text
-UBICACIONSELECCIONADA\TCCWebApiCore├── Apis│   ├── TCC.Api.Usuarios│   │   └── TCC.Api.Usuarios.dll
-│   ├── TCC.Api.Clientes│   │   └── TCC.Api.Clientes.dll
-│   └── TCC.Api.Envios│       └── TCC.Api.Envios.dll
-├── Web│   └── TCC.Web.InternalSystems│       └── TCC.Web.InternalSystems.dll
+UBICACIONSELECCIONADA\TCCWebApiCore\
+├── Apis\
+│   ├── TCC.Api.Usuarios\
+│   │   └── TCC.Api.Usuarios.dll
+│   ├── TCC.Api.Clientes\
+│   │   └── TCC.Api.Clientes.dll
+│   └── TCC.Api.Envios\
+│       └── TCC.Api.Envios.dll
+├── Web\
+│   └── TCC.Web.InternalSystems\
+│       └── TCC.Web.InternalSystems.dll
 ├── StartApis_TCCWebApiCore.bat
 └── StopApis_TCCWebApiCore.bat
 ```
