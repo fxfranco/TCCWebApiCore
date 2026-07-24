@@ -3,6 +3,9 @@ using TCC.Web.InternalSystems.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Registrar los servicios de salud
+builder.Services.AddHealthChecks();
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -54,5 +57,8 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// Mapear la ruta del endpoint
+app.MapHealthChecks("/health");
 
 app.Run();

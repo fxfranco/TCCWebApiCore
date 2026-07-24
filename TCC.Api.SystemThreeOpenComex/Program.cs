@@ -4,6 +4,9 @@ using TCC.Api.SystemThreeOpenComex.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Registrar los servicios de salud
+builder.Services.AddHealthChecks();
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -69,5 +72,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Mapear la ruta del endpoint
+app.MapHealthChecks("/health");
 
 app.Run();

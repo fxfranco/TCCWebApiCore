@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Documents/StartApis_TCCWebApiCore.bat" />
+    <File Path="Documents/StopApis_TCCWebApiCore.bat" />
+  </Folder>
   <Project Path="External.Api.SystemCarrier/External.Api.SystemCarrier.csproj" Id="c8ec5267-7452-437a-979c-2229934ab21c" />
   <Project Path="TCC.Api.SystemFourAsisComex/TCC.Api.SystemFourAsisComex.csproj" />
   <Project Path="TCC.Api.SystemOneBPMS/TCC.Api.SystemOneBPMS.csproj" />
