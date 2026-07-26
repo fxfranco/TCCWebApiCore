@@ -21,6 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Data\ApplicationDatabase.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\fields-config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

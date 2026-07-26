@@ -20,6 +20,9 @@ builder.Configuration.AddJsonFile("Data\\appusers.json", optional: false, reload
 // Registrar como Singleton para que la memoria sea compartida de forma global
 builder.Services.AddSingleton<InMemoryExcelStorage>();
 
+// Registrar el servicio que lee el Excel al iniciar la API
+builder.Services.AddHostedService<ExcelInitializerServices>();
+
 // Swagger / OpenAPI con soporte para autorización Bearer
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

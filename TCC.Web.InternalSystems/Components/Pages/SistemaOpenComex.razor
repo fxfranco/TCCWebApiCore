@@ -16,6 +16,12 @@
                 Obtener Token JWT
             </button>
         </div>
+        <!-- Botón 1: Cargar datos de memoria-->
+        <div class="position-relative">
+            <button class="btn btn-primary @(string.IsNullOrEmpty(AppStateOpenComex.Token) ? "disabled" : "")" type="button" @onclick="CargarDatosMemoriaAPI">
+                Cargar datos de la memoria
+            </button>
+        </div>
         <!-- Botón 2: Input de Carga de Excel -->
         <div class="position-relative">
             <button class="btn btn-primary @(string.IsNullOrEmpty(AppStateOpenComex.Token) ? "disabled" : "")" type="button">
@@ -337,6 +343,61 @@ else if (AppStateOpenComex.ExcelData != null)
                 errorMessage = $"Error al obtener token de la API: {response.StatusCode}";
                 infoMessage = null;
             }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error de comunicación: {ex.Message}";
+            infoMessage = null;
+        }
+    }
+
+    private async Task CargarDatosMemoriaAPI()
+    {
+        try
+        {
+            errorMessage = null;
+            infoMessage = "Cargando datos...";
+            var client = ClientFactory.CreateClient("OpenComexApi");
+
+            // Adjuntar el JWT obtenido previamente en la cabecera Authorization
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AppStateOpenComex.Token);
+
+            //var response = await client.PostAsync("api/excelfields/extract", content);
+            var response = await client.GetAsync("api/excelfields/latest-data");
+
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Se lee de manera genérica el arreglo dinámico devuelto por la API
+                var rawJson = await response.Content.ReadAsStringAsync();
+
+                // Configuramos para ignorar diferencias de mayúsculas/minúsculas
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                // Deserializamos al nuevo modelo estructurado
+                var apiResponse = JsonSerializer.Deserialize<ExcelFieldsResponse>(rawJson, options);
+
+                if (apiResponse != null)
+                {
+                    // Asignamos la propiedad 'Rows' a nuestro estado en memoria
+                    AppStateOpenComex.ExcelData = apiResponse.Rows;
+
+                    // Opcional: Puedes mostrar alertas si faltaron columnas en el Excel
+                    if (apiResponse.MissingColumns.Any())
+                    {
+                        infoMessage = $"¡Datos cargados con éxito! Nota: Faltan las columnas: {string.Join(", ", apiResponse.MissingColumns)}";
+                    }
+                    else
+                    {
+                        infoMessage = "¡Datos cargados con éxito! Datos cargados en memoria.";
+                    }
+                }
+            }
+            else
+            {
+                errorMessage = $"Error al cargar datos de memoria de la API: {response.StatusCode}";
+                infoMessage = null;
+            }
+            ExtraerColumnas();
         }
         catch (Exception ex)
         {
