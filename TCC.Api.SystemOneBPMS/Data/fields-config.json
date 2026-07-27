@@ -135,6 +135,14 @@
     {
       "name": "TOTAL FACTURA (USD)",
       "column": "TOTAL FACTURA (USD)"
+    },
+    {
+      "name": "NIT CLIENTE",
+      "column": "NIT CLIENTE"
+    },
+    {
+      "name": "ESTADO",
+      "column": "ESTADO"
     }
   ]
 }

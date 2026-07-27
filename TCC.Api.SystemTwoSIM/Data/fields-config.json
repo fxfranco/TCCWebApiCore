@@ -119,6 +119,14 @@
     {
       "name": "FECHA COMENTARIO",
       "column": "FECHA COMENTARIO"
+    },
+    {
+      "name": "NIT CLIENTE",
+      "column": "NIT CLIENTE"
+    },
+    {
+      "name": "ESTADO",
+      "column": "ESTADO"
     }
   ]
 }

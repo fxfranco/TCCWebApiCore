@@ -67,6 +67,14 @@
     {
       "name": "TRANSPORTISTA",
       "column": "TRANSPORTISTA"
+    },
+    {
+      "name": "NIT CLIENTE",
+      "column": "NIT CLIENTE"
+    },
+    {
+      "name": "ESTADO",
+      "column": "ESTADO"
     }
   ]
 }
