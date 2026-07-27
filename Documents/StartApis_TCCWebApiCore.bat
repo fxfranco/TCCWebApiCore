@@ -114,8 +114,8 @@ if exist "%RAIZ%%SUB_DIR%\%DLL_NAME%" (
 :: TIEMPO DE ESPERA Y COMPROBACIÓN
 :: ============================================================================
 echo.
-echo Esperando 10 segundos a que los procesos inicien...
-timeout /t 10 /nobreak > nul
+echo Esperando 20 segundos a que los procesos inicien...
+timeout /t 20 /nobreak > nul
 echo.
 
 echo ===================================================

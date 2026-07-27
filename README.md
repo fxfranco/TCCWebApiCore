@@ -93,10 +93,27 @@ UBICACIONSELECCIONADA\TCCWebApiCore\
 ```
 
 ---
+## 🚀 Organizar archivos de bases de datos
+
+### **Paso 7: Ubicar los archivos de base de datos de Excel**
+1. Los 6 archivos de excel previamente enviados se deben copiar y ubicar cada uno en la siguiente ubicación de cada api de la siguiente manera
+
+```text
+1_BPMS.xlsx ---> TCC.Api.SystemOneBPMS\Data
+2_SIM.xlsx --> TCC.Api.SystemTwoSIM\Data
+3_OpenComex.xlsx --> TCC.Api.SystemThreeOpenComex\Data
+4_AsisComex.xlsx --> TCC.Api.SystemFourAsisComex\Data
+5_Transportista.xlsx --> External.Api.SystemCarrier\Data
+6_Users.xlsx --> TCC.Api.SystemUsers\Data
+```
+
+2. Después de copiar cada archivo en su ubicación, todos los archivos deben cambiarse por el siguiente nombre `ApplicationDatabase.xlsx`.
+
+---
 
 ## 🚀 Ejecución y Verificación
 
-### **Paso 7: Iniciar los servicios**
+### **Paso 8: Iniciar los servicios**
 Ejecute el archivo **`StartApis_TCCWebApiCore.bat`** (se recomienda hacer clic derecho y seleccionar *Ejecutar como administrador*).
 * El script se encargará de levantar en segundo plano cada una de las aplicaciones y APIs configuradas.
 * Durante el proceso, la consola irá mostrando en tiempo real la información de inicio y la verificación del estado *(Health Check)* de cada servicio.
@@ -104,7 +121,7 @@ Ejecute el archivo **`StartApis_TCCWebApiCore.bat`** (se recomienda hacer clic d
 
 ---
 
-### **Paso 8: Monitoreo desde el Administrador de Tareas**
+### **Paso 9: Monitoreo desde el Administrador de Tareas**
 Para verificar qué APIs se están ejecutando en el sistema mediante la interfaz de Windows:
 1. Abra el **Administrador de Tareas** (`Ctrl + Shift + Esc`).
 2. Diríjase a la pestaña **Detalles**.
@@ -119,7 +136,7 @@ Para verificar qué APIs se están ejecutando en el sistema mediante la interfaz
 
 ## 🛑 Detención de Servicios
 
-### **Paso 9: Bajar o detener las APIs**
+### **Paso 10: Bajar o detener las APIs**
 Para detener la ejecución de todos los servicios asociados a la solución, puede optar por una de las siguientes opciones:
 
 * **Opción A:** Cerrar la ventana de comandos del script `StartApis_TCCWebApiCore.bat`.
