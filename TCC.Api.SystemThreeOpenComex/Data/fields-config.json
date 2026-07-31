@@ -5,6 +5,10 @@
       "column": "ID"
     },
     {
+      "name": "FECHA DE CREACIÓN",
+      "column": "FECHA DE CREACIÓN"
+    },    
+    {
       "name": "TIPO DE OPERACIÓN (IMPO - EXPO)",
       "column": "TIPO DE OPERACIÓN (IMPO - EXPO)"
     },
