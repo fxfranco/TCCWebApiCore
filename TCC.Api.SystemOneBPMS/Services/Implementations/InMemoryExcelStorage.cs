@@ -7,6 +7,7 @@ namespace TCC.Api.SystemOneBPMS.Services.Implementations
         // Usamos ConcurrentDictionary por seguridad de hilos (Thread-safe) ya que múltiples APIs/Apps pueden llamarlo a la vez
         private readonly ConcurrentDictionary<string, byte[]> _rawFiles = new();
         private readonly ConcurrentDictionary<string, object> _processedData = new();
+        private readonly ConcurrentDictionary<string, object> _processedDataLogs = new();
 
         // Almacenar y obtener el último Excel procesado de forma genérica
         public void SaveLatestData(object response)
@@ -14,9 +15,21 @@ namespace TCC.Api.SystemOneBPMS.Services.Implementations
             _processedData["latest"] = response;
         }
 
+        // Almacenar y obtener el último Excel procesado de forma genérica
+        public void SaveLatestLogsData(object response)
+        {
+            _processedDataLogs["latest"] = response;
+        }
+
         public object? GetLatestData()
         {
             _processedData.TryGetValue("latest", out var data);
+            return data;
+        }
+
+        public object? GetLatestLogsData()
+        {
+            _processedDataLogs.TryGetValue("latest", out var data);
             return data;
         }
 
@@ -42,6 +55,7 @@ namespace TCC.Api.SystemOneBPMS.Services.Implementations
         {
             _rawFiles.Clear();
             _processedData.Clear();
+            _processedDataLogs.Clear();
         }
     }
 }

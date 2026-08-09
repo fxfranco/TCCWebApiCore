@@ -172,6 +172,21 @@ public class ExcelFieldsController : ControllerBase
     }
 
     /// <summary>
+    /// ENDPOINT NUEVO: Permite a CUALQUIER otra aplicación o API consumir 
+    /// los últimos datos del Excel que están cargados en la memoria del servidor.
+    /// </summary>
+    [HttpGet("latestLogs-data")]
+    public IActionResult GetLatestLogsProcessedData()
+    {
+        var data = _memoryStorage.GetLatestLogsData();
+        if (data == null)
+        {
+            return NotFound("No hay datos de Excel cargados en la memoria de la API en este momento.");
+        }
+        return Ok(data);
+    }
+
+    /// <summary>
     /// ENDPOINT NUEVO OPCIONAL: Permite a otra aplicación descargar 
     /// el archivo físico de Excel que subió Blazor.
     /// </summary>

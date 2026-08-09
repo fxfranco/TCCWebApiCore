@@ -21,6 +21,7 @@ builder.Services.AddSingleton<InMemoryExcelStorage>();
 
 // Registrar el servicio que lee el Excel al iniciar la API
 builder.Services.AddHostedService<ExcelInitializerServices>();
+builder.Services.AddHostedService<ExcelInitializerLogsServices>();
 
 // Swagger / OpenAPI con soporte para autorización Bearer
 builder.Services.AddEndpointsApiExplorer();

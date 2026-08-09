@@ -1,0 +1,36 @@
+{
+  "fields": [
+    {
+      "name": "ID_LOG",
+      "column": "ID_LOG"
+    },
+    {
+      "name": "ID",
+      "column": "ID"
+    },
+    {
+      "name": "DOCUMENTO DE TRANSPORTE (HBL)",
+      "column": "DOCUMENTO DE TRANSPORTE (HBL)"
+    },
+    {
+      "name": "FECHA DE CAMBIO",
+      "column": "FECHA DE CAMBIO"
+    },
+    {
+      "name": "USUARIO DE CAMBIO",
+      "column": "USUARIO DE CAMBIO"
+    },
+    {
+      "name": "MENSAJE",
+      "column": "MENSAJE"
+    },
+    {
+      "name": "ESTADO ANTERIOR",
+      "column": "ESTADO ANTERIOR"
+    },
+    {
+      "name": "NUEVO ESTADO",
+      "column": "NUEVO ESTADO"
+    }
+  ]
+}
