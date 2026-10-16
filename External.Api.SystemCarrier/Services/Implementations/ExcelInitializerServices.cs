@@ -17,8 +17,7 @@ namespace External.Api.SystemCarrier.Services.Implementations
         {
             // 1. Ruta física del archivo dentro de la raíz del proyecto
             // Asumiendo que el archivo está en la carpeta 'Data/Plantilla.xlsx'
-            //var filePath = Path.Combine(_env.ContentRootPath, "Data", "Plantilla.xlsx");
-            String filePath = Directory.GetCurrentDirectory() + "\\Data\\ApplicationDatabase.xlsx";
+            String? filePath = ApplicationDatabaseFileManager.ObtenerUltimoArchivoExistente();
 
             if (File.Exists(filePath))
             {

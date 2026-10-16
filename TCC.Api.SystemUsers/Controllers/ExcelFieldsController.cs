@@ -137,14 +137,13 @@ public class ExcelFieldsController : ControllerBase
                 worksheet.Columns().AdjustToContents();
 
                 // Asegurar que el directorio destino de la ruta exista físicamente
-                var directorio = Path.GetDirectoryName(request.RutaArchivo);
-                if (!string.IsNullOrEmpty(directorio) && !Directory.Exists(directorio))
-                {
-                    Directory.CreateDirectory(directorio);
-                }
+                // 1. Definir la carpeta Data relativa al directorio base de la aplicación
+                String rutaParaGuardar = ApplicationDatabaseFileManager.ObtenerRutaSiguienteArchivo();
+                // Guardar el archivo usando 'rutaParaGuardar'
 
                 // Guardar el libro de trabajo de ClosedXML en la ruta dada
-                workbook.SaveAs(request.RutaArchivo);
+                //workbook.SaveAs(request.RutaArchivo);
+                workbook.SaveAs(rutaParaGuardar);
             }
 
             return Ok(new { mensaje = "Datos procesados y archivo guardado de forma exitosa." });
