@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using TCC.Api.SystemOneBPMS.Models.Configuration;
@@ -15,35 +15,51 @@ namespace TCC.Api.SystemOneBPMS.Extensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    /// <param name="dataDirectory">
+    /// Carpeta de datos (Excel + JSON). Null = {bin}/Data (API independiente).
+    /// La Web integradora envía {bin}/Data/BPMS.
+    /// </param>
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, string? dataDirectory = null)
     {
+        ApiModule.UseDataDirectory(dataDirectory);
+
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<IUserAuthenticator, InMemoryUserAuthenticator>();
         services.AddScoped<IFieldDefinitionProvider, JsonFieldDefinitionProvider>();
         services.AddScoped<IExcelReader, ClosedXmlExcelReader>();
         services.AddScoped<IExcelFieldsExtractorService, ExcelFieldsExtractorService>();
 
+        // Registrar como Singleton para que la memoria sea compartida de forma global
+        services.AddSingleton<InMemoryExcelStorage>();
+
+        // Registrar el servicio que lee el Excel al iniciar la API
+        services.AddHostedService<ExcelInitializerServices>();
+        services.AddHostedService<ExcelInitializerLogsServices>();
+
         return services;
     }
 
-    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+    /// <param name="jwtSectionName">
+    /// Sección de configuración con los datos JWT. "Jwt" en la API independiente;
+    /// "Apis:BPMS:Jwt" cuando se integra en la Web.
+    /// </param>
+    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration, string jwtSectionName = "Jwt")
     {
-        var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>()
-            ?? throw new InvalidOperationException("La sección 'Jwt' no está configurada en appsettings.json.");
+        var jwtSection = configuration.GetSection(jwtSectionName);
+        var jwtSettings = jwtSection.Get<JwtSettings>()
+            ?? throw new InvalidOperationException($"La sección '{jwtSectionName}' no está configurada en appsettings.json.");
 
         if (string.IsNullOrWhiteSpace(jwtSettings.SecretKey))
         {
-            throw new InvalidOperationException("Jwt:SecretKey no puede estar vacío.");
+            throw new InvalidOperationException($"{jwtSectionName}:SecretKey no puede estar vacío.");
         }
 
-        services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+        services.Configure<JwtSettings>(jwtSection);
 
-        services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
+        // Esquema con nombre propio (ApiModule.AuthScheme): así varias APIs pueden
+        // registrarse en el mismo host sin chocar con el esquema "Bearer".
+        services.AddAuthentication()
+            .AddJwtBearer(ApiModule.AuthScheme, options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -60,14 +76,13 @@ public static class ServiceCollectionExtensions
                 // Eventos de diagnóstico: mientras se depura un 401, estos logs
                 // muestran la causa exacta (firma inválida, token expirado,
                 // issuer/audience incorrectos, header ausente, etc.).
-                // Se pueden quitar una vez confirmado que todo funciona.
                 options.Events = new JwtBearerEvents
                 {
                     OnAuthenticationFailed = context =>
                     {
                         var logger = context.HttpContext.RequestServices
                             .GetRequiredService<ILoggerFactory>()
-                            .CreateLogger("JwtBearer");
+                            .CreateLogger($"JwtBearer.{ApiModule.Area}");
                         logger.LogWarning(context.Exception, "Falló la validación del JWT: {Message}", context.Exception.Message);
                         return Task.CompletedTask;
                     },
@@ -75,7 +90,7 @@ public static class ServiceCollectionExtensions
                     {
                         var logger = context.HttpContext.RequestServices
                             .GetRequiredService<ILoggerFactory>()
-                            .CreateLogger("JwtBearer");
+                            .CreateLogger($"JwtBearer.{ApiModule.Area}");
                         logger.LogWarning(
                             "Challenge 401 emitido. Error: {Error}, Descripción: {Description}, Header Authorization presente: {HasAuthHeader}",
                             context.Error,

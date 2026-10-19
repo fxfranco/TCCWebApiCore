@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using TCC.Api.SystemOneBPMS.Models;
 using TCC.Api.SystemOneBPMS.Services.Interfaces;
@@ -20,7 +20,7 @@ public class JsonFieldDefinitionProvider : IFieldDefinitionProvider
 
     public JsonFieldDefinitionProvider(IHostEnvironment environment)
     {
-        _dataDirectory = Path.Combine(environment.ContentRootPath, "Data");
+        _dataDirectory = ApiModule.DataDirectory;
     }
 
     public async Task<IReadOnlyList<FieldDefinition>> GetFieldDefinitionsAsync(string configFileName, CancellationToken cancellationToken = default)

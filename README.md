@@ -143,3 +143,65 @@ Para detener la ejecución de todos los servicios asociados a la solución, pued
 * **Opción B:** Ejecutar el archivo **`StopApis_TCCWebApiCore.bat`**, el cual enviará la señal de cierre a los procesos activos de manera controlada.
 
 ---
+
+# 🧩 Modo integrado: una sola aplicación (Web + 6 APIs)
+
+`TCC.Web.InternalSystems` referencia los 6 proyectos de API y los ejecuta **dentro del mismo proceso**. Para publicar en un hosting solo se sube la Web; los endpoints de cada API quedan expuestos por ella, separados por área:
+
+| API | Proyecto | Área | Ejemplo de endpoint |
+|-----|----------|------|---------------------|
+| BPMS | TCC.Api.SystemOneBPMS | `BPMS` | `POST /api/BPMS/auth/login` |
+| SIM | TCC.Api.SystemTwoSIM | `SIM` | `GET /api/SIM/excelfields/latest-data` |
+| OpenComex | TCC.Api.SystemThreeOpenComex | `OpenComex` | `POST /api/OpenComex/excelfields/extract` |
+| AsisComex | TCC.Api.SystemFourAsisComex | `AsisComex` | `POST /api/AsisComex/excelfields/save-in-memory` |
+| Transportista externo | External.Api.SystemCarrier | `Carrier` | `GET /api/Carrier/excelfields/download-latest` |
+| Usuarios | TCC.Api.SystemUsers | `Users` | `POST /api/Users/excelfields/clear-server-memory` |
+
+* **Swagger** de todas las APIs: `/swagger` (un documento por área). **Health check**: `/health`.
+* **JWT**: cada API tiene su propio esquema (`Bearer_{Area}`) y su configuración en `appsettings.json` → `Apis:{Area}:Jwt`. Un token de BPMS no sirve en SIM (igual que cuando eran APIs separadas).
+* **Excel / JSON**: cada API lee y escribe en `Data/{Area}/` dentro de la Web publicada (se copian al compilar desde la carpeta `Data` de cada API). Al iniciar, cada API carga su Excel en memoria (`ExcelInitializerServices`).
+* **Páginas Razor**: siguen usando `IHttpClientFactory`; los clientes de `ApiSettings` vacíos apuntan a la misma aplicación (URL autodetectada o `InternalApi:BaseUrl`). Si se pone una URL absoluta en `ApiSettings`, se usa esa API externa.
+* Cada API **sigue funcionando sola** con su `Program.cs` (scripts `.bat`), ahora en rutas `api/{Area}/...`.
+
+# 🐳 Docker y Docker Hub
+
+Archivos: `TCC.Web.InternalSystems/Dockerfile`, `docker-compose.yml`, `.dockerignore`, `.env.example` (todo desde la raíz de la solución).
+
+## Carpeta Data dentro de la imagen
+
+Por defecto la imagen **incluye** la carpeta Data en `/app/Data` (pensado para hostings sin persistencia). Al construir se toman:
+
+* `TCC.Web.InternalSystems/Data/appusers.json` → `/app/Data/appusers.json`
+* `<Proyecto API>/Data/*.xlsx|*.json` → `/app/Data/{BPMS|SIM|OpenComex|AsisComex|Carrier|Users}/`
+
+El build muestra la lista de archivos incluidos y falla si falta `appusers.json`.
+
+* **Cambiar datos**: editar el Excel/JSON en la carpeta `Data` de la API correspondiente, reconstruir y volver a subir la imagen.
+* **Sin persistencia**: lo que se guarde con "Guardar en Sistema" (`ApplicationDatabase_N.xlsx`) existe solo mientras viva el contenedor; al reiniciarse/recrearse vuelve a los datos de la imagen.
+* **Imagen sin datos** (si algún hosting sí permite montar carpetas): `docker build --build-arg INCLUDE_DATA=false ...` y montar la carpeta en `/app/Data` (se genera con `Documents/PrepararCarpetaData.ps1` / `.sh`; ver el bloque `volumes` comentado en `docker-compose.yml`).
+* En Visual Studio / `dotnet run` no cambia nada: los archivos se copian a `bin\...\Data` al compilar.
+
+## Construir, probar y publicar
+
+```bash
+# 1. Variables: copiar .env.example a .env y ajustar DOCKERHUB_USER, JWT_SECRET_KEY, HOST_PORT
+# 2. Construir y levantar (la imagen ya trae la carpeta Data)  ->  http://localhost:8080
+docker compose up -d --build
+docker compose logs -f
+
+# 3. Subir a Docker Hub
+docker login
+docker compose push
+#    o, sin compose:
+docker build -f TCC.Web.InternalSystems/Dockerfile -t <usuario>/tcc-internal-systems:latest .
+docker push <usuario>/tcc-internal-systems:latest
+
+# 4. En el servidor / hosting (sin volúmenes)
+docker run -d -p 8080:8080 --name tcc-internal-systems <usuario>/tcc-internal-systems:latest
+
+# 5. Después de cambiar un Excel o JSON en el repositorio: reconstruir y volver a subir
+docker compose build && docker compose push
+```
+
+* El contenedor escucha en **HTTP 8080**; el HTTPS lo pone el hosting / proxy (se respetan los encabezados `X-Forwarded-*`).
+* Para producción cambie la clave JWT con `JWT_SECRET_KEY` (o `Apis__{Area}__Jwt__SecretKey`).

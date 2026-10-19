@@ -427,3 +427,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Carpeta de datos generada para Docker (Documents/PrepararCarpetaData.*)
+docker-data/

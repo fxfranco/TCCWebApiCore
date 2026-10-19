@@ -17,7 +17,7 @@ namespace TCC.Api.SystemOneBPMS.Services.Implementations
         {
             // 1. Ruta física del archivo dentro de la raíz del proyecto
             // Asumiendo que el archivo está en la carpeta 'Data/Plantilla.xlsx'
-            String filePath = Directory.GetCurrentDirectory() + "\\Data\\DatosSeguimientoDatabase.xlsx";
+            String filePath = Path.Combine(ApiModule.DataDirectory, "DatosSeguimientoDatabase.xlsx");
 
             if (File.Exists(filePath))
             {

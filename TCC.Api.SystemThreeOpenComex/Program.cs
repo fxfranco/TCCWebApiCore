@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
 using TCC.Api.SystemThreeOpenComex.Extensions;
 using TCC.Api.SystemThreeOpenComex.Services.Implementations;
 
@@ -15,13 +15,13 @@ builder.Services.AddControllers();
 builder.Services.AddApplicationServices();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
-builder.Configuration.AddJsonFile("Data\\appusers.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile(Path.Combine("Data", "appusers.json"), optional: false, reloadOnChange: true);
 
-// Registrar como Singleton para que la memoria sea compartida de forma global
-builder.Services.AddSingleton<InMemoryExcelStorage>();
+//// Registrar como Singleton para que la memoria sea compartida de forma global
+//builder.Services.AddSingleton<InMemoryExcelStorage>();
 
-// Registrar el servicio que lee el Excel al iniciar la API
-builder.Services.AddHostedService<ExcelInitializerServices>();
+//// Registrar el servicio que lee el Excel al iniciar la API
+//builder.Services.AddHostedService<ExcelInitializerServices>();
 
 // Swagger / OpenAPI con soporte para autorización Bearer
 builder.Services.AddEndpointsApiExplorer();

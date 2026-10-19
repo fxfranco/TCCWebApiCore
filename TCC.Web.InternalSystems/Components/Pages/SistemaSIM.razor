@@ -23,7 +23,7 @@
             </button>
         </div>
         <!-- Botón 2: Input de Carga de Excel -->
-        <div class="position-relative">
+@*         <div class="position-relative">
             <button class="btn btn-primary @(string.IsNullOrEmpty(AppStateSIM.Token) ? "disabled" : "")" type="button">
                 Cargar Archivo Excel
             </button>
@@ -33,7 +33,7 @@
         <div class="position-relative">
             <label class="form-label fw-bold">Ruta de guardado del Excel en el Servidor:</label>
             <input type="text" class="form-control" placeholder="Ej: C:\BPMS\Archivos\Resultado.xlsx" @bind="rutaServidor" />
-        </div>
+        </div> *@
 
         <div class="position-relative">
             <button class="btn btn-primary" @onclick="EnviarDatosAPI" disabled="@(AppStateSIM.ExcelData == null || !AppStateSIM.ExcelData.Any())">
@@ -259,7 +259,7 @@ else if (AppStateSIM.ExcelData != null)
     // Diccionario temporal que almacena los datos que el usuario digita en el modal
     private Dictionary<string, string?> FilaFormulario = new();
 
-    private string rutaServidor = string.Empty;
+    private string rutaServidor = "C:\\Nofunciona";
 
     protected override void OnInitialized()
     {
@@ -291,7 +291,7 @@ else if (AppStateSIM.ExcelData != null)
                 Registros = AppStateSIM.ExcelData ?? new List<Dictionary<string, string?>>()
             };
 
-            var response = await client.PostAsJsonAsync("api/excelfields/save-in-memory", payload);
+            var response = await client.PostAsJsonAsync("api/SIM/excelfields/save-in-memory", payload);
 
             if (response.IsSuccessStatusCode)
             {
@@ -321,7 +321,7 @@ else if (AppStateSIM.ExcelData != null)
 
             // Cuerpo del login requerido por tu AuthController (ajusta según tus DTOs reales)
             var loginPayload = new { Username = AppStateUser.Username, Password = AppStateUser.Password };
-            var response = await client.PostAsJsonAsync("api/auth/login", loginPayload);
+            var response = await client.PostAsJsonAsync("api/SIM/auth/login", loginPayload);
 
             if (response.IsSuccessStatusCode)
             {
@@ -362,8 +362,8 @@ else if (AppStateSIM.ExcelData != null)
             // Adjuntar el JWT obtenido previamente en la cabecera Authorization
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AppStateSIM.Token);
 
-            //var response = await client.PostAsync("api/excelfields/extract", content);
-            var response = await client.GetAsync("api/excelfields/latest-data");
+            //var response = await client.PostAsync("api/SIM/excelfields/extract", content);
+            var response = await client.GetAsync("api/SIM/excelfields/latest-data");
 
 
             if (response.IsSuccessStatusCode)
@@ -429,7 +429,7 @@ else if (AppStateSIM.ExcelData != null)
             // "file" debe coincidir con el nombre del parámetro IFormFile en el controlador de tu API
             content.Add(streamContent, "ExcelFile", file.Name);
 
-            var response = await client.PostAsync("api/excelfields/extract", content);
+            var response = await client.PostAsync("api/SIM/excelfields/extract", content);
 
             if (response.IsSuccessStatusCode)
             {

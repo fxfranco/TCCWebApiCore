@@ -5,12 +5,77 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+
+    <!--
+      Las APIs se referencian como proyectos (sus controladores y servicios se ejecutan
+      dentro de esta aplicación). Estas dos propiedades evitan que los archivos de contenido
+      de cada API (appsettings.json, Data\*.xlsx, Data\*.json, launchSettings...) se copien
+      a la raíz de esta Web: todas tienen el mismo nombre y se sobrescribirían entre sí
+      (y con el appsettings.json de la Web), además de provocar NETSDK1152 al publicar.
+      Los datos de cada API se copian de forma controlada más abajo, en Data\{Area}\.
+    -->
+    <_GetChildProjectCopyToOutputDirectoryItems>false</_GetChildProjectCopyToOutputDirectoryItems>
+    <_GetChildProjectCopyToPublishDirectoryItems>false</_GetChildProjectCopyToPublishDirectoryItems>
+
+    <!--
+      Carpeta Data (Excel + JSON) FUERA de la publicación / imagen Docker.
+      - Compilar / F5 en Visual Studio: los archivos se copian a bin\...\Data (todo funciona igual).
+      - dotnet publish / Docker: NO se incluyen; en el servidor se monta la carpeta Data
+        (ver DataRoot en appsettings.json y docker-compose.yml).
+      Para incluirlos en una publicación (p. ej. hosting IIS por FTP / Web Deploy):
+        - en el perfil .pubxml:  <PublishDataFiles>true</PublishDataFiles>
+        - o por consola:         dotnet publish -p:PublishDataFiles=true
+      (ver el ItemGroup condicionado al final de este archivo)
+    -->
+
+    <!--
+      Publicación self-contained (p. ej. win-x86 / win-x64): los proyectos de API son "Exe"
+      (tienen su propio Program.cs para ejecutarse solos), y el SDK no permite que un ejecutable
+      self-contained referencie ejecutables framework-dependent (NETSDK1150).
+      Aquí las APIs se usan solo como librerías (su .dll); el runtime lo aporta esta Web,
+      así que se desactiva esa validación.
+    -->
+    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\External.Api.SystemCarrier\External.Api.SystemCarrier.csproj" />
+    <ProjectReference Include="..\TCC.Api.SystemFourAsisComex\TCC.Api.SystemFourAsisComex.csproj" />
+    <ProjectReference Include="..\TCC.Api.SystemOneBPMS\TCC.Api.SystemOneBPMS.csproj" />
+    <ProjectReference Include="..\TCC.Api.SystemThreeOpenComex\TCC.Api.SystemThreeOpenComex.csproj" />
+    <ProjectReference Include="..\TCC.Api.SystemTwoSIM\TCC.Api.SystemTwoSIM.csproj" />
+    <ProjectReference Include="..\TCC.Api.SystemUsers\TCC.Api.SystemUsers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Update="Data\appusers.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
+  </ItemGroup>
+
+  <!--
+    Datos de cada API integrada: se copian a Data\{Area}\ en la salida de compilación
+    (solo en la publicación si PublishDataFiles=true).
+    El Area debe coincidir con ApiModule.Area de cada proyecto de API.
+  -->
+  <ItemGroup>
+    <None Include="..\TCC.Api.SystemOneBPMS\Data\**\*.xlsx;..\TCC.Api.SystemOneBPMS\Data\**\*.json" Exclude="..\TCC.Api.SystemOneBPMS\Data\**\~$*" LinkBase="Data\BPMS" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
+    <None Include="..\TCC.Api.SystemTwoSIM\Data\**\*.xlsx;..\TCC.Api.SystemTwoSIM\Data\**\*.json" Exclude="..\TCC.Api.SystemTwoSIM\Data\**\~$*" LinkBase="Data\SIM" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
+    <None Include="..\TCC.Api.SystemThreeOpenComex\Data\**\*.xlsx;..\TCC.Api.SystemThreeOpenComex\Data\**\*.json" Exclude="..\TCC.Api.SystemThreeOpenComex\Data\**\~$*" LinkBase="Data\OpenComex" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
+    <None Include="..\TCC.Api.SystemFourAsisComex\Data\**\*.xlsx;..\TCC.Api.SystemFourAsisComex\Data\**\*.json" Exclude="..\TCC.Api.SystemFourAsisComex\Data\**\~$*" LinkBase="Data\AsisComex" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
+    <None Include="..\External.Api.SystemCarrier\Data\**\*.xlsx;..\External.Api.SystemCarrier\Data\**\*.json" Exclude="..\External.Api.SystemCarrier\Data\**\~$*" LinkBase="Data\Carrier" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
+    <None Include="..\TCC.Api.SystemUsers\Data\**\*.xlsx;..\TCC.Api.SystemUsers\Data\**\*.json" Exclude="..\TCC.Api.SystemUsers\Data\**\~$*" LinkBase="Data\Users" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
+  <!--
+    PublishDataFiles=true => la carpeta Data SÍ se incluye en la publicación.
+    Va en un ItemGroup (no en una propiedad) para que funcione también cuando el valor
+    viene de un perfil .pubxml, que MSBuild importa después del cuerpo de este archivo.
+  -->
+  <ItemGroup Condition="'$(PublishDataFiles)' == 'true'">
+    <Content Update="Data\appusers.json" CopyToPublishDirectory="PreserveNewest" />
+    <None Update="..\TCC.Api.SystemOneBPMS\Data\**;..\TCC.Api.SystemTwoSIM\Data\**;..\TCC.Api.SystemThreeOpenComex\Data\**;..\TCC.Api.SystemFourAsisComex\Data\**;..\External.Api.SystemCarrier\Data\**;..\TCC.Api.SystemUsers\Data\**" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

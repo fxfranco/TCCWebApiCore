@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using TCC.Api.SystemFourAsisComex.Models.DTOs;
 using TCC.Api.SystemFourAsisComex.Services.Interfaces;
 
@@ -9,7 +9,8 @@ namespace TCC.Api.SystemFourAsisComex.Controllers;
 /// no conoce detalles de cómo se validan credenciales ni de cómo se firma el JWT (SRP/DIP).
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Area(ApiModule.Area)]
+[Route("api/[area]/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly IUserAuthenticator _authenticator;

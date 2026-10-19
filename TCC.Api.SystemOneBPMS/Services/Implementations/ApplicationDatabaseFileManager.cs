@@ -15,7 +15,7 @@ namespace TCC.Api.SystemOneBPMS.Services.Implementations
         /// </summary>
         public static string? ObtenerUltimoArchivoExistente()
         {
-            var carpetaData = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
+            var carpetaData = ApiModule.DataDirectory;
             if (!Directory.Exists(carpetaData)) return null;
 
             var archivosEncontrados = Directory.EnumerateFiles(carpetaData, "*.xlsx")
@@ -61,7 +61,7 @@ namespace TCC.Api.SystemOneBPMS.Services.Implementations
         /// </summary>
         public static string ObtenerRutaSiguienteArchivo()
         {
-            var carpetaData = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
+            var carpetaData = ApiModule.DataDirectory;
             if (!Directory.Exists(carpetaData))
             {
                 Directory.CreateDirectory(carpetaData);

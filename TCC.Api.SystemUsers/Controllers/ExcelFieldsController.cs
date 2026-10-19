@@ -1,4 +1,4 @@
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TCC.Api.SystemUsers.Models.DTOs;
@@ -12,7 +12,8 @@ namespace TCC.Api.SystemUsers.Controllers;
 /// campos desde un JSON de configuración y devuelve solo esas columnas.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Area(ApiModule.Area)]
+[Route("api/[area]/[controller]")]
 //[Authorize]
 public class ExcelFieldsController : ControllerBase
 {
@@ -33,7 +34,7 @@ public class ExcelFieldsController : ControllerBase
     /// Requiere header: Authorization: Bearer {token}
     /// </summary>
     [HttpPost("extract")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = ApiModule.AuthScheme)]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(ExcelFieldsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -78,7 +79,7 @@ public class ExcelFieldsController : ControllerBase
     }
 
     [HttpPost("save-in-memory")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = ApiModule.AuthScheme)]
     public IActionResult SaveInMemoryAndExport([FromBody] GuardarDatosRequest request)
     {
         if (request == null || request.Registros == null || !request.Registros.Any())

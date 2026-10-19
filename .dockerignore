@@ -1,0 +1,19 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/*.suo
+**/Properties/PublishProfiles/
+**/~$*
+# Generados en ejecución (no se meten en la imagen)
+**/Data/**/ApplicationDatabase_*.xlsx
+.git/
+.github/
+.gitignore
+Documents/
+README.md
+docker-compose*.yml
+.env
+docker-data/

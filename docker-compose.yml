@@ -1,0 +1,44 @@
+# =============================================================================
+# TCC Internal Systems - Web Razor con las 6 APIs integradas en un solo contenedor
+#
+#   docker compose up -d --build        -> construye y levanta en http://localhost:8080
+#   docker compose push                 -> sube la imagen a Docker Hub (previo docker login)
+#
+# Variables (archivo .env junto a este compose, ver .env.example):
+#   DOCKERHUB_USER   usuario de Docker Hub
+#   IMAGE_TAG        etiqueta de la imagen (por defecto latest)
+#   HOST_PORT        puerto publicado en el host (por defecto 8080)
+#   JWT_SECRET_KEY   clave de firma JWT para las 6 APIs (mínimo 32 caracteres)
+#
+# La imagen INCLUYE la carpeta Data (Excel + JSON) en /app/Data, tomada de la carpeta
+# Data de cada API y de TCC.Web.InternalSystems/Data/appusers.json al construir.
+# Cambiar un Excel = editarlo en el repositorio y reconstruir/subir la imagen.
+# Sin volumen: lo que se guarde con "Guardar en Sistema" vive solo mientras viva el contenedor.
+# =============================================================================
+services:
+  tcc-web:
+    image: ${DOCKERHUB_USER:-tuusuario}/tcc-internal-systems:${IMAGE_TAG:-latest}
+    container_name: tcc-internal-systems
+    build:
+      context: .
+      dockerfile: TCC.Web.InternalSystems/Dockerfile
+      args:
+        INCLUDE_DATA: "true"   # Data dentro de la imagen
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # Las páginas llaman a las APIs de esta misma app. Se autodetecta; se puede fijar así:
+      InternalApi__BaseUrl: http://localhost:8080/
+      # Clave JWT por API (sobrescribe appsettings.json -> Apis:{Area}:Jwt:SecretKey)
+      Apis__BPMS__Jwt__SecretKey: ${JWT_SECRET_KEY:-ESTA_ES_UNA_CLAVE_SECRETA_DE_DEMO_CAMBIAR_EN_PRODUCCION_1234567890}
+      Apis__SIM__Jwt__SecretKey: ${JWT_SECRET_KEY:-ESTA_ES_UNA_CLAVE_SECRETA_DE_DEMO_CAMBIAR_EN_PRODUCCION_1234567890}
+      Apis__OpenComex__Jwt__SecretKey: ${JWT_SECRET_KEY:-ESTA_ES_UNA_CLAVE_SECRETA_DE_DEMO_CAMBIAR_EN_PRODUCCION_1234567890}
+      Apis__AsisComex__Jwt__SecretKey: ${JWT_SECRET_KEY:-ESTA_ES_UNA_CLAVE_SECRETA_DE_DEMO_CAMBIAR_EN_PRODUCCION_1234567890}
+      Apis__Carrier__Jwt__SecretKey: ${JWT_SECRET_KEY:-ESTA_ES_UNA_CLAVE_SECRETA_DE_DEMO_CAMBIAR_EN_PRODUCCION_1234567890}
+      Apis__Users__Jwt__SecretKey: ${JWT_SECRET_KEY:-ESTA_ES_UNA_CLAVE_SECRETA_DE_DEMO_CAMBIAR_EN_PRODUCCION_1234567890}
+    # Opcional, solo si el hosting SÍ permite persistencia: montar una carpeta sobre /app/Data
+    # (reemplaza los datos de la imagen por los de esa carpeta).
+    # volumes:
+    #   - ./docker-data:/app/Data
+    restart: unless-stopped
