@@ -82,7 +82,12 @@ public class ExcelFieldsController : ControllerBase
     [Authorize(AuthenticationSchemes = ApiModule.AuthScheme)]
     public IActionResult SaveInMemoryAndExport([FromBody] GuardarDatosRequest request)
     {
-        if (request == null || request.Registros == null || !request.Registros.Any())
+        // Filas a guardar: las de la estructura completa (Datos.Rows) o, por compatibilidad, Registros
+        var registros = request?.Datos?.Rows is { Count: > 0 } filasEstructura
+            ? filasEstructura
+            : request?.Registros;
+
+        if (request == null || registros == null || !registros.Any())
         {
             return BadRequest("No se proporcionaron registros válidos.");
         }
@@ -94,9 +99,18 @@ public class ExcelFieldsController : ControllerBase
 
         try
         {
-            // 1. Guardar la información en la memoria de la API
-            //_memoryService.DatosAlmacenados = request.Registros;
-            _memoryStorage.SaveLatestData(request.Registros);
+            // 1. Guardar la información en la memoria de la API SIEMPRE con la misma estructura
+            //    que devuelven latest-data / extract (ExcelFieldsResponse). Si el cliente no envió
+            //    los metadatos, se conservan los que ya había en memoria.
+            var datosAnteriores = _memoryStorage.GetLatestData() as ExcelFieldsResponse;
+            var columnasRegistros = registros.SelectMany(d => d.Keys).Distinct().ToList();
+
+            var estructura = new ExcelFieldsResponse(
+                RequestedFields: request.Datos?.RequestedFields ?? datosAnteriores?.RequestedFields ?? columnasRegistros,
+                MissingColumns: request.Datos?.MissingColumns ?? datosAnteriores?.MissingColumns ?? new List<string>(),
+                Rows: registros);
+
+            _memoryStorage.SaveLatestData(estructura);
 
             // 2. Generar el archivo Excel Dinámico usando EPPlus
             // 2. Generar el archivo Excel Dinámico usando ClosedXML
@@ -106,7 +120,7 @@ public class ExcelFieldsController : ControllerBase
                 var worksheet = workbook.Worksheets.Add("Datos BPMS");
 
                 // Extraemos todas las columnas dinámicas de los diccionarios enviados
-                var columnas = request.Registros
+                var columnas = registros
                     .SelectMany(d => d.Keys)
                     .Distinct()
                     .ToList();
@@ -121,7 +135,7 @@ public class ExcelFieldsController : ControllerBase
 
                 // Pintar Filas de Datos (Desde fila 2)
                 int rowIndex = 2;
-                foreach (var fila in request.Registros)
+                foreach (var fila in registros)
                 {
                     for (int colIndex = 0; colIndex < columnas.Count; colIndex++)
                     {

@@ -1,6 +1,7 @@
 ﻿@page "/sistemaOpenComex"
 @using System.Net.Http.Headers
 @using System.Text.Json
+@using TCC.Web.InternalSystems.Models
 @inject IHttpClientFactory ClientFactory
 @inject TCC.Web.InternalSystems.Services.AppStateServiceUser AppStateUser
 @inject TCC.Web.InternalSystems.Services.AppStateServiceOpenComex AppStateOpenComex
@@ -284,17 +285,20 @@ else if (AppStateOpenComex.ExcelData != null)
             var client = ClientFactory.CreateClient("OpenComexApi");
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AppStateOpenComex.Token);
 
-            // Preparamos el payload con los datos de memoria actuales
+            // Preparamos el payload con la ESTRUCTURA COMPLETA (misma forma que devuelve latest-data)
+            // para que la memoria de la API conserve el formato ExcelFieldsResponse.
             var payload = new GuardarDatosRequest
             {
                 RutaArchivo = rutaServidor,
-                Registros = AppStateOpenComex.ExcelData ?? new List<Dictionary<string, string?>>()
+                Datos = ConstruirEstructuraCompleta()
             };
 
             var response = await client.PostAsJsonAsync("api/OpenComex/excelfields/save-in-memory", payload);
 
             if (response.IsSuccessStatusCode)
             {
+                // Lo que quedó en la memoria de la API es exactamente esta estructura
+                AppStateOpenComex.DatosApi = payload.Datos;
                 infoMessage = "¡Datos guardados con éxito en la API y archivo Excel generado correctamente en el servidor!";
             }
             else
@@ -378,7 +382,9 @@ else if (AppStateOpenComex.ExcelData != null)
 
                 if (apiResponse != null)
                 {
-                    // Asignamos la propiedad 'Rows' a nuestro estado en memoria
+                    // Conservamos la estructura completa (RequestedFields, MissingColumns, Rows)
+                    AppStateOpenComex.DatosApi = apiResponse;
+                    // Asignamos la propiedad 'Rows' a nuestro estado en memoria (la tabla trabaja con ExcelData)
                     AppStateOpenComex.ExcelData = apiResponse.Rows;
 
                     // Opcional: Puedes mostrar alertas si faltaron columnas en el Excel
@@ -443,7 +449,9 @@ else if (AppStateOpenComex.ExcelData != null)
 
                 if (apiResponse != null)
                 {
-                    // Asignamos la propiedad 'Rows' a nuestro estado en memoria
+                    // Conservamos la estructura completa (RequestedFields, MissingColumns, Rows)
+                    AppStateOpenComex.DatosApi = apiResponse;
+                    // Asignamos la propiedad 'Rows' a nuestro estado en memoria (la tabla trabaja con ExcelData)
                     AppStateOpenComex.ExcelData = apiResponse.Rows;
 
                     // Opcional: Puedes mostrar alertas si faltaron columnas en el Excel
@@ -661,16 +669,29 @@ else if (AppStateOpenComex.ExcelData != null)
         ExtraerColumnas(); // Recalcula la paginación y refresca la vista de la tabla
     }
 
-    public class ExcelFieldsResponse
+    /// <summary>
+    /// Arma la estructura completa a enviar: los metadatos que entregó la API
+    /// (RequestedFields / MissingColumns) + las filas actuales de la tabla (con las ediciones).
+    /// </summary>
+    private ExcelFieldsResponse ConstruirEstructuraCompleta()
     {
-        public List<string> RequestedFields { get; set; } = new();
-        public List<string> MissingColumns { get; set; } = new();
-        public List<Dictionary<string, string?>> Rows { get; set; } = new();
+        var filas = (AppStateOpenComex.ExcelData ?? new List<Dictionary<string, string>>())
+            .Select(fila => fila.ToDictionary(kv => kv.Key, kv => (string?)kv.Value))
+            .ToList();
+
+        return new ExcelFieldsResponse
+        {
+            RequestedFields = AppStateOpenComex.DatosApi?.RequestedFields ?? Columnas.ToList(),
+            MissingColumns = AppStateOpenComex.DatosApi?.MissingColumns ?? new List<string>(),
+            Rows = filas
+        };
     }
 
     public class GuardarDatosRequest
     {
         public string RutaArchivo { get; set; } = string.Empty;
-        public List<Dictionary<string, string?>> Registros { get; set; } = new();
+
+        /// <summary>Estructura completa (RequestedFields, MissingColumns, Rows).</summary>
+        public ExcelFieldsResponse Datos { get; set; } = new();
     }
 }
