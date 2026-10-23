@@ -9,5 +9,9 @@ namespace External.Api.SystemCarrier.Services.Interfaces;
 /// </summary>
 public interface IExcelFieldsExtractorService
 {
-    Task<ExcelFieldsResponse> ExtractAsync(Stream excelStream, string fieldsConfigFileName, CancellationToken cancellationToken = default);
+    /// <param name="includeChangeUser">
+    /// true (por defecto): agrega a cada fila el campo ApiModule.ChangeUserField ("changeuser"),
+    /// vacío si el Excel no lo trae.
+    /// </param>
+    Task<ExcelFieldsResponse> ExtractAsync(Stream excelStream, string fieldsConfigFileName, CancellationToken cancellationToken = default, bool includeChangeUser = true);
 }

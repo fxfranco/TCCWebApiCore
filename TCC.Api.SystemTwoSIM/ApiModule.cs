@@ -14,6 +14,13 @@ public static class ApiModule
     public const string AuthScheme = "Bearer_SIM";
 
     /// <summary>
+    /// Campo de auditoría que se agrega SIEMPRE a cada registro (aunque no venga en el Excel ni en
+    /// fields-config.json). Vacío por defecto; la Web lo llena con el usuario que agrega/modifica.
+    /// Al guardar (ApplicationDatabase_N.xlsx) se escribe como una columna más.
+    /// </summary>
+    public const string ChangeUserField = "changeuser";
+
+    /// <summary>
     /// Carpeta donde están el Excel y los JSON de configuración del módulo.
     /// Independiente: {bin}/Data. Integrada en la Web: {bin}/Data/SIM.
     /// Se asigna desde AddApplicationServices.

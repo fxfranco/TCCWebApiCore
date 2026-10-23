@@ -6,7 +6,8 @@
     },
     {
       "name": "FECHA DE CREACIÓN",
-      "column": "FECHA DE CREACIÓN"
+      "column": "FECHA DE CREACIÓN",
+      "type": "date"
     },    
     {
       "name": "TIPO DE OPERACIÓN (IMPO - EXPO)",
@@ -62,59 +63,73 @@
     },
     {
       "name": "FECHA BODEGA ORIGEN",
-      "column": "FECHA BODEGA ORIGEN"
+      "column": "FECHA BODEGA ORIGEN",
+      "type": "date"
     },
     {
       "name": "ETD (Fecha Estimada Salida)",
-      "column": "ETD (Fecha Estimada Salida)"
+      "column": "ETD (Fecha Estimada Salida)",
+      "type": "date"
     },
     {
       "name": "ATD (Fecha Real Salida)",
-      "column": "ATD (Fecha Real Salida)"
+      "column": "ATD (Fecha Real Salida)",
+      "type": "date"
     },
     {
       "name": "ETA (Fecha Estimada Llegada)",
-      "column": "ETA (Fecha Estimada Llegada)"
+      "column": "ETA (Fecha Estimada Llegada)",
+      "type": "date"
     },
     {
       "name": "ATA (Fecha Real Llegada)",
-      "column": "ATA (Fecha Real Llegada)"
+      "column": "ATA (Fecha Real Llegada)",
+      "type": "date"
     },
     {
       "name": "FECHA BODEGA DESTINO",
-      "column": "FECHA BODEGA DESTINO"
+      "column": "FECHA BODEGA DESTINO",
+      "type": "date"
     },
     {
       "name": "FECHA DE NACIONALIZACION",
-      "column": "FECHA DE NACIONALIZACION"
+      "column": "FECHA DE NACIONALIZACION",
+      "type": "date"
     },
     {
       "name": "FECHA DESPACHO (DESTINO)",
-      "column": "FECHA DESPACHO (DESTINO)"
+      "column": "FECHA DESPACHO (DESTINO)",
+      "type": "date"
     },
     {
       "name": "FECHA PLANILLA",
-      "column": "FECHA PLANILLA"
+      "column": "FECHA PLANILLA",
+      "type": "date"
     },
     {
       "name": "FECHA ENTREGA CONTENEDOR",
-      "column": "FECHA ENTREGA CONTENEDOR"
+      "column": "FECHA ENTREGA CONTENEDOR",
+      "type": "date"
     },
     {
       "name": "FECHA DE DEVOLUCIÓN REAL CONTENEDOR",
-      "column": "FECHA DE DEVOLUCIÓN REAL CONTENEDOR"
+      "column": "FECHA DE DEVOLUCIÓN REAL CONTENEDOR",
+      "type": "date"
     },
     {
       "name": "FECHA SOLICITUD ANTICIPO",
-      "column": "FECHA SOLICITUD ANTICIPO"
+      "column": "FECHA SOLICITUD ANTICIPO",
+      "type": "date"
     },
     {
       "name": "FECHA PAGO ANTICIPO",
-      "column": "FECHA PAGO ANTICIPO"
+      "column": "FECHA PAGO ANTICIPO",
+      "type": "date"
     },
     {
       "name": "FECHA FACTURA",
-      "column": "FECHA FACTURA"
+      "column": "FECHA FACTURA",
+      "type": "date"
     },
     {
       "name": "COMENTARIO",
@@ -122,7 +137,8 @@
     },
     {
       "name": "FECHA COMENTARIO",
-      "column": "FECHA COMENTARIO"
+      "column": "FECHA COMENTARIO",
+      "type": "date"
     },
     {
       "name": "NIT CLIENTE",

@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserAuthenticator, InMemoryUserAuthenticator>();
         services.AddScoped<IFieldDefinitionProvider, JsonFieldDefinitionProvider>();
         services.AddScoped<IExcelReader, ClosedXmlExcelReader>();
+        services.AddSingleton<IDateValueNormalizer, ExcelDateValueNormalizer>();
         services.AddScoped<IExcelFieldsExtractorService, ExcelFieldsExtractorService>();
 
         // Registrar como Singleton para que la memoria sea compartida de forma global

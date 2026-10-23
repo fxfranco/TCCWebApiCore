@@ -33,7 +33,7 @@ namespace TCC.Api.SystemOneBPMS.Services.Implementations
 
                 // Asumiendo que tu método recibe el Stream (si es asíncrono usa await)
                 //var result = await extractorService.ExtractFieldsAsync(stream);
-                var result = await extractorService.ExtractAsync(stream, "fields-config-logs.json", cancellationToken);
+                var result = await extractorService.ExtractAsync(stream, "fields-config-logs.json", cancellationToken, includeChangeUser: false);
 
                 // 2. NUEVO: Guardar la respuesta estructurada en la memoria global de la API
                 inMemoryStorage.SaveLatestLogsData(result);

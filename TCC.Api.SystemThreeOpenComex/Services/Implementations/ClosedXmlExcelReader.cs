@@ -1,3 +1,4 @@
+using System.Globalization;
 using ClosedXML.Excel;
 using TCC.Api.SystemThreeOpenComex.Services.Interfaces;
 
@@ -43,12 +44,30 @@ public class ClosedXmlExcelReader : IExcelReader
                 }
 
                 var cell = row.Cell(col + 1);
-                rowData[headers[col]] = cell.IsEmpty() ? null : cell.GetString();
+                rowData[headers[col]] = cell.IsEmpty() ? null : ReadCellAsText(cell);
             }
 
             result.Add(rowData);
         }
 
         return Task.FromResult<IReadOnlyList<IReadOnlyDictionary<string, string?>>>(result);
+    }
+
+    /// <summary>
+    /// Convierte la celda a texto sin depender de la cultura del proceso.
+    /// Las celdas de tipo fecha se devuelven en ISO ("yyyy-MM-dd", o "yyyy-MM-dd HH:mm:ss" si tienen hora);
+    /// antes cell.GetString() devolvía "MM/dd/yyyy HH:mm:ss" (cultura invariante) y el día/mes se confundían.
+    /// </summary>
+    private static string ReadCellAsText(IXLCell cell)
+    {
+        if (cell.DataType == XLDataType.DateTime)
+        {
+            var date = cell.GetDateTime();
+            return date.TimeOfDay == TimeSpan.Zero
+                ? date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+                : date.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+        }
+
+        return cell.GetString();
     }
 }

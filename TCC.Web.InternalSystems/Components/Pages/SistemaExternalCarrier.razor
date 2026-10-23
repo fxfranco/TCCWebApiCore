@@ -198,6 +198,11 @@ else if (AppStateExternalCarrier.ExcelData != null)
                 </div>
                 <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
 
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+
                     @foreach (var columna in Columnas)
                     {
                         var col = columna;
@@ -210,6 +215,25 @@ else if (AppStateExternalCarrier.ExcelData != null)
                             {
                                 <!-- El ID SIEMPRE estará deshabilitado para el usuario (al agregar o editar) -->
                                 <input type="text" class="form-control bg-light text-muted" value="@FilaFormulario[col]" disabled />
+                            }
+                            else if (EstadosRegistro.EsColumnaEstado(col))
+                            {
+                                var estadoActual = FilaFormulario[col];
+                                <!-- Estado: solo se permite seleccionar una de las opciones del catálogo -->
+                                <select class="form-select"
+                                        value="@estadoActual"
+                                        @onchange="(e) => ActualizarCampoFormulario(col, e.Value?.ToString())">
+                                    <option value="" disabled selected="@string.IsNullOrEmpty(estadoActual)">-- Seleccione un estado --</option>
+                                    @foreach (var estado in EstadosRegistro.Opciones)
+                                    {
+                                        <option value="@estado" selected="@(estado == estadoActual)">@estado</option>
+                                    }
+                                    @if (!string.IsNullOrEmpty(estadoActual) && !EstadosRegistro.EsValido(estadoActual))
+                                    {
+                                        <!-- Valor antiguo fuera del catálogo: se muestra, pero no se puede guardar -->
+                                        <option value="@estadoActual" disabled selected>@estadoActual (no válido)</option>
+                                    }
+                                </select>
                             }
                             else
                             {
@@ -506,8 +530,10 @@ else if (AppStateExternalCarrier.ExcelData != null)
                 .Take(RegistrosPorPagina);
 
             // Extrae todas las llaves distintas que existen en la lista de diccionarios
+            // (los campos de sistema como "changeuser" viajan en el registro pero no se muestran)
             Columnas = AppStateExternalCarrier.ExcelData
                 .SelectMany(d => d.Keys)
+                .Where(k => !CamposSistema.EsOculto(k))
                 .Distinct()
                 .ToList();
         }
@@ -562,6 +588,7 @@ else if (AppStateExternalCarrier.ExcelData != null)
         // Asignamos el nuevo ID calculado al diccionario del formulario
         FilaFormulario[columnaId] = nuevoId.ToString();
 
+        errorMessage = null;
         mostrarModal = true;
     }
 
@@ -575,8 +602,14 @@ else if (AppStateExternalCarrier.ExcelData != null)
         foreach (var col in Columnas)
         {
             FilaFormulario[col] = filaSeleccionada.ContainsKey(col) ? filaSeleccionada[col] : string.Empty;
+
+            if (EstadosRegistro.EsColumnaEstado(col))
+            {
+                FilaFormulario[col] = EstadosRegistro.Normalizar(FilaFormulario[col]);
+            }
         }
 
+        errorMessage = null;
         mostrarModal = true;
     }
 
@@ -604,6 +637,14 @@ else if (AppStateExternalCarrier.ExcelData != null)
             return;
         }
 
+        // La columna Estado solo admite las opciones del catálogo
+        var columnaEstado = Columnas.FirstOrDefault(c => EstadosRegistro.EsColumnaEstado(c));
+        if (columnaEstado != null && !EstadosRegistro.EsValido(FilaFormulario.GetValueOrDefault(columnaEstado)))
+        {
+            errorMessage = $"Seleccione un valor válido para {columnaEstado}: {string.Join(", ", EstadosRegistro.Opciones)}.";
+            return;
+        }
+
         if (AppStateExternalCarrier.ExcelData == null) AppStateExternalCarrier.ExcelData = new List<Dictionary<string, string?>>();
 
         if (esModoEdicion)
@@ -618,6 +659,9 @@ else if (AppStateExternalCarrier.ExcelData != null)
                 {
                     registroOriginal[col] = FilaFormulario[col];
                 }
+
+                // Usuario que hizo la modificación (campo oculto que se envía a la API)
+                registroOriginal[CamposSistema.UsuarioCambio] = AppStateUser.Username;
                 infoMessage = "Registro modificado correctamente en memoria.";
             }
         }
@@ -632,7 +676,12 @@ else if (AppStateExternalCarrier.ExcelData != null)
             }
 
             // Insertar el nuevo diccionario clonado a la lista global
-            AppStateExternalCarrier.ExcelData.Add(new Dictionary<string, string?>(FilaFormulario));
+            var nuevoRegistro = new Dictionary<string, string?>(FilaFormulario)
+            {
+                // Usuario que agregó el registro (campo oculto que se envía a la API)
+                [CamposSistema.UsuarioCambio] = AppStateUser.Username
+            };
+            AppStateExternalCarrier.ExcelData.Add(nuevoRegistro);
             infoMessage = "Nuevo registro agregado correctamente en memoria.";
         }
 

@@ -62,35 +62,43 @@
     },
     {
       "name": "FECHA BODEGA ORIGEN",
-      "column": "FECHA BODEGA ORIGEN"
+      "column": "FECHA BODEGA ORIGEN",
+      "type": "date"
     },
     {
       "name": "ETD (Fecha Estimada Salida)",
-      "column": "ETD (Fecha Estimada Salida)"
+      "column": "ETD (Fecha Estimada Salida)",
+      "type": "date"
     },
     {
       "name": "ATD (Fecha Real Salida)",
-      "column": "ATD (Fecha Real Salida)"
+      "column": "ATD (Fecha Real Salida)",
+      "type": "date"
     },
     {
       "name": "ETA (Fecha Estimada Llegada)",
-      "column": "ETA (Fecha Estimada Llegada)"
+      "column": "ETA (Fecha Estimada Llegada)",
+      "type": "date"
     },
     {
       "name": "ATA (Fecha Real Llegada)",
-      "column": "ATA (Fecha Real Llegada)"
+      "column": "ATA (Fecha Real Llegada)",
+      "type": "date"
     },
     {
       "name": "FECHA BODEGA DESTINO",
-      "column": "FECHA BODEGA DESTINO"
+      "column": "FECHA BODEGA DESTINO",
+      "type": "date"
     },
     {
       "name": "FECHA DE NACIONALIZACION",
-      "column": "FECHA DE NACIONALIZACION"
+      "column": "FECHA DE NACIONALIZACION",
+      "type": "date"
     },
     {
       "name": "FECHA ENTREGA CONTENEDOR",
-      "column": "FECHA ENTREGA CONTENEDOR"
+      "column": "FECHA ENTREGA CONTENEDOR",
+      "type": "date"
     },
     {
       "name": "DIAS LIBRES",
@@ -102,7 +110,8 @@
     },
     {
       "name": "FECHA DE DEVOLUCIÓN REAL CONTENEDOR",
-      "column": "FECHA DE DEVOLUCIÓN REAL CONTENEDOR"
+      "column": "FECHA DE DEVOLUCIÓN REAL CONTENEDOR",
+      "type": "date"
     },
     {
       "name": "CANT. DIAS DEMORAS CONTENEDOR",

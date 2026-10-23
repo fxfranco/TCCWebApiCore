@@ -14,7 +14,8 @@
     },
     {
       "name": "FECHA DE CAMBIO",
-      "column": "FECHA DE CAMBIO"
+      "column": "FECHA DE CAMBIO",
+      "type": "date"
     },
     {
       "name": "USUARIO DE CAMBIO",

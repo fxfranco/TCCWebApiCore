@@ -92,6 +92,16 @@ public class ExcelFieldsController : ControllerBase
             return BadRequest("No se proporcionaron registros válidos.");
         }
 
+        // Todo registro guardado lleva el campo "changeuser" (vacío si el cliente no lo envió),
+        // así queda como columna en el nuevo ApplicationDatabase_N.xlsx.
+        foreach (var fila in registros)
+        {
+            if (!fila.ContainsKey(ApiModule.ChangeUserField))
+            {
+                fila[ApiModule.ChangeUserField] = string.Empty;
+            }
+        }
+
         if (string.IsNullOrWhiteSpace(request.RutaArchivo))
         {
             return BadRequest("La ruta del archivo de salida es obligatoria.");
@@ -105,8 +115,14 @@ public class ExcelFieldsController : ControllerBase
             var datosAnteriores = _memoryStorage.GetLatestData() as ExcelFieldsResponse;
             var columnasRegistros = registros.SelectMany(d => d.Keys).Distinct().ToList();
 
+            var requestedFields = (request.Datos?.RequestedFields ?? datosAnteriores?.RequestedFields ?? columnasRegistros).ToList();
+            if (!requestedFields.Contains(ApiModule.ChangeUserField, StringComparer.OrdinalIgnoreCase))
+            {
+                requestedFields.Add(ApiModule.ChangeUserField);
+            }
+
             var estructura = new ExcelFieldsResponse(
-                RequestedFields: request.Datos?.RequestedFields ?? datosAnteriores?.RequestedFields ?? columnasRegistros,
+                RequestedFields: requestedFields,
                 MissingColumns: request.Datos?.MissingColumns ?? datosAnteriores?.MissingColumns ?? new List<string>(),
                 Rows: registros);
 

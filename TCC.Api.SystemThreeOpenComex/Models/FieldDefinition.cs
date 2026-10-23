@@ -10,6 +10,14 @@ public class FieldDefinition
 
     /// <summary>Nombre de la columna esperada en el encabezado del Excel.</summary>
     public string Column { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Tipo del campo: "text" (por defecto) o "date". Los campos "date" se entregan
+    /// siempre como "yyyy-MM-dd" (ver IDateValueNormalizer).
+    /// </summary>
+    public string Type { get; set; } = "text";
+
+    public bool IsDate => string.Equals(Type, "date", StringComparison.OrdinalIgnoreCase);
 }
 
 /// <summary>
